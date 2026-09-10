@@ -2,6 +2,12 @@
 
 Live state ledger. Newest at the top. Read AGENTS.md first.
 
+## 2026-09-10 · Ryan invited to the GitHub repository
+
+- Trevor supplied Ryan's GitHub profile image and explicitly requested adding him. Verified the exact account `justadude-jpg` (GitHub user ID 185280048).
+- Sent repository invitation 332570220 for `tlaakso07/happydog-studio` with write access. Ryan had no existing access or pending invitation. Acceptance remains Ryan's next step; do not report him as an active collaborator until accepted.
+- Current partner starting point remains `codex/continue-studio`; see `docs/BETA-HANDOFF.md`. No Supabase, billing, or other service access was granted.
+
 ## 2026-09-10 · Sign-in deferred; shared beta opens directly
 
 - Trevor reported that the fresh email still returned to the login page and explicitly requested removing sign-in from the beta so work can continue with his partner. Real email login remains unresolved, regardless of passing isolated tests. Stop pursuing Auth for now; resume the product build order.
