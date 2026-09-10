@@ -1,0 +1,14 @@
+{
+  "name": "happydog-studio",
+  "private": true,
+  "engines": { "node": ">=22" },
+  "packageManager": "pnpm@11.9.0",
+  "scripts": {
+    "dev": "pnpm --filter @studio/web dev",
+    "worker": "pnpm --filter @studio/worker dev",
+    "build": "pnpm -r build",
+    "lint": "pnpm -r lint",
+    "test": "pnpm -r test",
+    "db:types": "supabase gen types typescript --linked > packages/db/src/database.ts"
+  }
+}
