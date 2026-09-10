@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Studio UI concept review</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f6f7f9;color:#16181d;font:15px/1.5 system-ui,sans-serif}main{max-width:1600px;margin:auto;padding:30px}h1{font-size:clamp(26px,4vw,42px);letter-spacing:-.035em;margin:0 0 8px}p{margin:0 0 16px;color:#515b6b}.eyebrow{font-size:11px;letter-spacing:.1em;text-transform:uppercase}.controls{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;margin:24px 0 16px}.tabs,.versions{display:flex;gap:8px;flex-wrap:wrap}button{font:inherit;background:white;border:1px solid #dce0e9;border-radius:9px;padding:11px 16px;min-height:44px;color:#16181d;cursor:pointer}button[aria-pressed=true]{background:#2447f5;color:white;border-color:#2447f5}button:focus-visible,a:focus-visible{outline:3px solid #2447f5;outline-offset:4px}.note{padding:16px 20px;background:white;border:1px solid #e5e7ee;border-radius:10px;margin-bottom:18px}figure{margin:0}img{width:100%;height:auto;display:block;border:1px solid #e5e7ee;border-radius:12px;background:white}figcaption{margin-top:12px;color:#515b6b;font-size:13px}a{color:#2447f5}footer{margin:24px 0;font-size:13px} @media(max-width:600px){main{padding:18px}button{font-size:13px;padding:10px 12px}}
+</style></head>
+<body><main>
+<p class="eyebrow">Studio / Design discussion / Three generated concepts</p>
+<h1>A more considered creative workspace.</h1>
+<p>Compare each concept with the running app. These images explore layout and visual hierarchy; the proposed screens are not implemented.</p>
+<div class="controls"><div class="tabs" aria-label="Screen"><button data-screen="home" aria-pressed="true">01 Editorial Home</button><button data-screen="brand" aria-pressed="false">02 Brand Atelier</button><button data-screen="approvals" aria-pressed="false">03 Screening Room</button></div><div class="versions" aria-label="Version"><button data-version="concept" aria-pressed="true">Proposed concept</button><button data-version="current" aria-pressed="false">Current app</button></div></div>
+<p id="note" class="note" aria-live="polite"></p>
+<figure><a id="full" href="01-editorial-home.png" target="_blank" rel="noopener"><img id="screen" src="01-editorial-home.png" alt="Proposed Studio Home concept"></a><figcaption id="caption"></figcaption></figure>
+<footer>Generated sample people, logos, copy, and measurements are illustrative. The build will use approved assets and actual state. <a href="REVIEW.md">Review and build recommendations</a> · <a href="PROMPTS.md">Exact image prompts</a></footer>
+</main><script>
+const screens={home:{name:'Editorial Home',file:'01-editorial-home.png',note:'Bring the ad forward, make the next task obvious, and reduce the offer to a compact strip. Next actions must identify the actual job they belong to.'},brand:{name:'Brand Atelier',file:'02-brand-atelier.png',note:'Show the company identity at a glance, inspect source-backed assets, and begin website intake. Imports create a draft beside the approved brand.'},approvals:{name:'Screening Room',file:'03-screening-room.png',note:'Give the media more room, keep decisions in reach, and reveal correction reasons only when needed. Playback and checks require real media and evidence.'}};
+let selected=Object.hasOwn(screens,location.hash.slice(1))?location.hash.slice(1):'home';let version='concept';
+function render(){const s=screens[selected];const src=version==='concept'?s.file:'current-'+selected+'.png';document.getElementById('screen').src=src;document.getElementById('screen').alt=(version==='concept'?'Generated concept: ':'Current application: ')+s.name;document.getElementById('full').href=src;document.getElementById('note').textContent=s.note;document.getElementById('caption').textContent=(version==='concept'?'Generated design reference':'Screenshot of the running sample app')+' · '+s.name+' · Click the image to inspect at full resolution.';document.querySelectorAll('[data-screen]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.screen===selected));document.querySelectorAll('[data-version]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.version===version));}
+document.querySelectorAll('[data-screen]').forEach(b=>b.addEventListener('click',()=>{selected=b.dataset.screen;render()}));document.querySelectorAll('[data-version]').forEach(b=>b.addEventListener('click',()=>{version=b.dataset.version;render()}));render();
+</script></body></html>

@@ -2,6 +2,15 @@
 
 Live state ledger. Newest at the top. Read AGENTS.md first.
 
+## 2026-09-09 · Premium UI concepts for discussion
+
+- Trevor asked for a review of the current UI/UX and three premium image mockups, then discussion before building the chosen upgrades.
+- Reviewed and captured all six running owner screens. Main improvements: reduced navigation, stronger content/task hierarchy, readable scripts/scenes, larger approval media, persistent actions, contextual correction reasons, and Brand Room identity overview plus website intake.
+- Generated three images with the built-in image tool using current app screenshots: Editorial Home, Brand Atelier, Screening Room. Saved concepts, before screenshots, exact prompts, a current/proposed comparison gallery, and review/build recommendations under `design/concepts/2026-09-ui-review/`.
+- These are complementary proposed screens, not production UI or verified company media. The review documents required corrections to generated sample wording, branding, counts, checks, and inconsistent controls. Do not copy generated real-employee or legal-assurance claims into runtime UI.
+- Application code remains unchanged pending the user's design discussion. Recommended build order: shared shell and controls, Home/Approvals, Brand Room/website intake preview, then Create/Script/Scenes using the same system.
+- Validation: all three concept/current pairs load at full resolution in the comparison gallery; controls work at 1440 and 390 pixels without page overflow. `git diff --check` passes. Local comparison server runs at `http://127.0.0.1:3102` for this session; the standalone HTML also opens from disk.
+
 ## 2026-09-09 · Website-based brand setup added to plan
 
 - Trevor requested website URL intake using Firecrawl or an equivalent to develop a company design system, especially for smaller companies with few assets.
