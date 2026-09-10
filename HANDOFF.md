@@ -2,6 +2,12 @@
 
 Live state ledger. Newest at the top. Read AGENTS.md first.
 
+## 2026-09-10 · Resend sender prepared; Squarespace login pending
+
+- Trevor completed Resend signup and reported he was signed in. Verified the account in Chrome. Added `mail.laaksolabs.com` as an unverified sending domain in North Virginia; receiving stays disabled. No API key was created and Supabase SMTP is not yet connected.
+- Public nameservers and the Resend setup page identify Squarespace as the DNS host. Prepared the exact three records in `docs/EMAIL-SETUP.md`. Public DNS has no matching records yet; no DNS records were changed.
+- Opened Squarespace login in Chrome tab 1759128980 and asked Trevor to sign in to the account managing the domain. Resend domain setup remains in tab 1759128977. Next: review the existing zone, obtain the browser-required action-time confirmation for authorizing subdomain sending, add/verify the three records, connect Supabase SMTP, and finish Studio sign-in.
+
 ## 2026-09-10 · First agency invitation prepared; email sender needed
 
 - Trevor selected his business email for the first Studio agency account. Prepared an agency invitation for that exact address using an operator-only empty-database bootstrap. Created the Happy Dog Media organization and an `agency-setup` administration workspace with zero ad allowance. No membership is granted until Supabase verifies the email and the user accepts the invitation. No Auth user was manually confirmed and no email was sent.
