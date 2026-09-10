@@ -8,6 +8,8 @@ An agency locks a company's brand into a per-company brand system. The owner sta
 
 **New to the repo, human or agent: read [ONBOARDING.md](ONBOARDING.md).** It covers setup, the rules that get work rejected, and what is deliberately not built yet.
 
+**Ryan's Mac + Claude desktop guide:** download [the interactive HTML guide](docs/ryan-guide.html) and open it in a browser. It includes the current sample workflow, a five-day plan, local setup and push guard instructions, and an exportable feedback questionnaire. GitHub's file viewer shows source; download the file to use its interactive controls.
+
 ```bash
 git clone --branch codex/continue-studio https://github.com/tlaakso07/happydog-studio.git
 cd happydog-studio

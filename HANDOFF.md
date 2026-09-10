@@ -2,6 +2,17 @@
 
 Live state ledger. Newest at the top. Read AGENTS.md first.
 
+## 2026-09-10 · Interactive beginner handoff for Ryan
+
+- Trevor requested an interactive HTML link to email Ryan: product walkthrough, honest beta status, five days of useful work, complete safe local setup, and a final feedback questionnaire. Ryan confirmed Mac with Claude desktop. No partner email was sent.
+- Added `docs/ryan-guide.html`, a self-contained guide with seven chapters, current versus planned workflow, six brand books, status table, expandable Mac setup, copyable Claude prompts and commands, five-day task selectors, troubleshooting, glossary, and saved chapter progress. README and BETA-HANDOFF link the downloadable HTML.
+- The setup uses GitHub Desktop, Claude Code Local with Manual permissions, Node 22+, the pinned pnpm through npx, and a separate local branch from `origin/codex/continue-studio`. It explains local saves, commits, pushes, merges, and deployment independently. Local `push.default=nothing` and a disabled origin push URL are instructions for Ryan to apply and verify, not changes made to this checkout. The guard does not cover alternate remotes, direct URLs, API writes, or removal of its settings.
+- The five-day plan covers exploration, one small clarity improvement, sample brand-asset readiness, an optional clearly labeled website-intake prototype, and a tested local handoff. Broad UI redesign, live Auth repair, migrations, real uploads, provider calls, and remote writes are outside these beginner tasks. All navigation and six books must remain.
+- Feedback saves only in the current browser. Users can copy or download Markdown answers, open a short email draft and attach the export themselves, print the guide, or download a clean standalone HTML copy without answers. Nothing submits feedback automatically.
+- Published privately for Trevor at https://studio-ryan-field-guide.trevor291458.chatgpt.site through a separate Sites project. Audience choice is pending: anyone with the link versus restricted Ryan access. Do not tell Ryan the hosted URL is accessible until access is updated. The HTML file can already be sent directly as an attachment and opened in a browser.
+- Hosting project: `appgprj_6aa30606195c8191b70265373bda9b11`. Separate temporary checkout: `/tmp/studio-ryan-guide-site`; canonical guide source is this repository's `docs/ryan-guide.html`. Source was pushed and version 1 privately deployed successfully. The archive contains only the static guide and hosting manifest, with no app credentials or database connection.
+- Validation: DOM harness passed chapter progress, all workflow/day selectors, copy targets, draft reload persistence, feedback download, email-draft behavior, clean portable HTML, blocked-storage fallback, and input validation. Git guard readback passed in a disposable repository without network pushes. Native WebMCP capability documentation was unavailable; optional page tool logic passed the DOM harness but native contract verification is unverified. No broader browser UI QA was requested. Local HTML preview returned HTTP 200. App runtime code is unchanged.
+
 ## 2026-09-10 · Ryan invited to the GitHub repository
 
 - Trevor supplied Ryan's GitHub profile image and explicitly requested adding him. Verified the exact account `justadude-jpg` (GitHub user ID 185280048).

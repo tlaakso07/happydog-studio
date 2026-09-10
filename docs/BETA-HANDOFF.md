@@ -2,6 +2,8 @@
 
 Trevor requested that sign-in be removed from the beta on September 10, 2026 so product work can continue with his partner. The current shared branch is `codex/continue-studio`, in draft PR #1. Main may be behind it.
 
+Ryan uses a Mac with Claude desktop. His beginner setup, interactive workflow, five-day task plan, and feedback form are in [ryan-guide.html](ryan-guide.html). Download and open it in a browser. The guide explains how to create a separate local branch and block routine origin pushes; it does not apply these settings automatically or change Trevor's repository configuration. Ryan should keep his work local until the partners explicitly agree on uploading and reviewing it.
+
 ## Start
 
 Use Node 22+ and pnpm 11.9.0, as pinned in package.json.
