@@ -2,6 +2,21 @@
 
 Live state ledger. Newest at the top. Read AGENTS.md first.
 
+## 2026-09-09 · Codex continuation and five-screen preview
+
+- Connected the GitHub repository to `/Users/trevor/Documents/ChatGPT/Studio 2.0` on `codex/continue-studio`. The earlier checkout at `~/happydog-studio` was not modified.
+- Trevor chose the remaining screens first, and asked for an application review with suggestions for discussion.
+- Added Create from Deal, Script, Storyboard, Approval Queue, and Brand Room against references 01 and 03 through 06. The script and scene walkthrough uses job ID `heating-outdoors`; other job IDs return 404.
+- Shared the existing shell, fonts, button component, and palette. Kept the existing text-only navigation instead of adopting the inconsistent rails and decorative browser chrome in the other renders.
+- `lib/studio-preview.ts` is the single typed sample payload and pure interaction reducer. A workspace-scoped client provider keeps edits and decisions during navigation and resets on reload. The sidebar and Home state card reflect preview decisions. Allowance remains unchanged.
+- Interactions: editable script lines, five sample openings, scene image swap, approval/redo/skip, A/R/S and arrow keyboard controls outside editable controls, required redo reasons, queue completion/restart, brand-book details, and an unsent sample change request. Editing approved words invalidates the scene approval gate. Empty script lines cannot be approved.
+- Every new screen identifies itself as a design preview. No voice sample or video is fabricated. Generation buttons lead through explicit sample screens and a completion dialog. Script edits invalidate displayed sample checks.
+- Reference photos are clipped photographic regions of unchanged design files under `public/fixtures/reference`. They preserve the supplied visual language but require real, optimized assets before launch. They are not final product or cast media.
+- Validation: 11 node tests, TypeScript, ESLint, and production build pass. All five routes return 200 at 1440, 1024, and 390 with no horizontal page overflow. Browser walkthrough verifies edit → approve words → approve scenes → queue, count synchronization, unchanged allowance, redo validation, keyboard typing isolation, completion/restart, brand details, and change-request dialog.
+- Corrected the test's literal forbidden punctuation to a Unicode escape without weakening its assertion.
+- `docs/APP-REVIEW.md` records product suggestions and code findings for discussion, including timing, skipped ads, brand immutability, tenant relationships, and existing-account invitations.
+- Not connected: auth, Supabase reads/writes, migration 0004, generation, playback, voice, source-file upload, or real request delivery. Calendar, Library, Renders, Insights, Chat, Feed, and Offer remain the original placeholders. No production deployment or database changes.
+
 ## 2026-09-09 · Repo opened up for a second developer
 
 - Private repo live at github.com/tlaakso07/happydog-studio, default branch `main`. Only `.env.example` is tracked, no secrets.

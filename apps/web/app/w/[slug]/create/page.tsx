@@ -1,10 +1,6 @@
-import { ComingSoon } from "@/components/shell/coming-soon";
+import { CreateScreen } from "@/components/studio/create-screen";
 
-export default function Page() {
-  return (
-    <ComingSoon
-      title="New ad"
-      sentence="Creating an ad from this month's deal arrives once the brand room is locked."
-    />
-  );
+export default async function Page({ params }: PageProps<"/w/[slug]/create">) {
+  const { slug } = await params;
+  return <CreateScreen base={`/w/${slug}`} />;
 }

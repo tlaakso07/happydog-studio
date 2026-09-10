@@ -37,4 +37,4 @@ supabase/        migrations 0001, 0002, 0003, 0006
 
 ## Status
 
-Studio Home is built. Everything else is scaffold. See `HANDOFF.md` for the current entry.
+Studio Home and five owner-screen previews are built: Create from Deal, Script, Storyboard, Approval Queue, and Brand Room. The walkthrough uses sample content, with edits and decisions retained until reload. Auth, persistence, generation, and playback are not connected. See `HANDOFF.md` for the current entry and [the app review](docs/APP-REVIEW.md) for decisions to discuss.

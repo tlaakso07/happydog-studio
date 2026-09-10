@@ -1,6 +1,9 @@
+"use client";
+
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import type { HomeState } from "@/lib/studio-home";
+import { useStudioPreview } from "@/components/studio/preview-provider";
 
 type StateCardProps = {
   state: HomeState;
@@ -41,7 +44,22 @@ function copyFor(state: HomeState, base: string): Copy {
 }
 
 export function StateCard({ state, base }: StateCardProps) {
-  const copy = copyFor(state, base);
+  const { state: preview } = useStudioPreview();
+  const remaining =
+    state.kind === "ready"
+      ? Math.max(0, state.count - Object.keys(preview.decisions).length)
+      : 0;
+  const visibleState: HomeState =
+    state.kind === "ready" && Object.keys(preview.decisions).length > 0
+      ? remaining > 0
+        ? {
+            kind: "ready",
+            count: remaining,
+            minutes: Math.ceil((remaining * 40) / 60),
+          }
+        : { kind: "quiet" }
+      : state;
+  const copy = copyFor(visibleState, base);
 
   return (
     <section
@@ -62,7 +80,12 @@ export function StateCard({ state, base }: StateCardProps) {
           <Link href={copy.primary.href}>{copy.primary.label}</Link>
         </Button>
         {copy.secondary ? (
-          <Button asChild size="xl" variant="outline" className="w-full sm:w-auto sm:min-w-[200px]">
+          <Button
+            asChild
+            size="xl"
+            variant="outline"
+            className="w-full sm:w-auto sm:min-w-[200px]"
+          >
             <Link href={copy.secondary.href}>{copy.secondary.label}</Link>
           </Button>
         ) : null}

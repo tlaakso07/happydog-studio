@@ -7,6 +7,7 @@ import { navItems } from "@/lib/nav";
 import { Wordmark } from "@/components/shell/wordmark";
 import { AllowanceCard } from "@/components/shell/allowance-card";
 import type { Allowance, Viewer, Workspace } from "@/lib/studio-home";
+import { useStudioPreview } from "@/components/studio/preview-provider";
 
 type SidebarProps = {
   workspace: Workspace;
@@ -45,6 +46,7 @@ export function Sidebar({
   canSwitch,
 }: SidebarProps) {
   const pathname = usePathname();
+  const { state } = useStudioPreview();
   const base = `/w/${workspace.slug}`;
   const items = navItems(base);
 
@@ -75,7 +77,10 @@ export function Sidebar({
             className="flex h-11 w-full items-center justify-between gap-2 rounded-[10px] px-2.5 text-left transition-colors duration-150 hover:bg-muted"
           >
             {workspaceName}
-            <ChevronDown className="size-4 shrink-0 text-meta" aria-hidden="true" />
+            <ChevronDown
+              className="size-4 shrink-0 text-meta"
+              aria-hidden="true"
+            />
           </button>
         ) : (
           <div className="flex h-11 items-center px-2.5">{workspaceName}</div>
@@ -85,8 +90,18 @@ export function Sidebar({
       <ul className="flex gap-0.5 overflow-x-auto px-3 pb-2 lg:mt-4 lg:flex-col lg:overflow-visible lg:pb-0">
         {items.map((item) => {
           const active =
-            item.href === base ? pathname === base : pathname.startsWith(item.href);
-          const count = item.badge === "approvals" ? approvalsCount : 0;
+            item.href === base
+              ? pathname === base
+              : pathname.startsWith(item.href) ||
+                (item.href === `${base}/create` &&
+                  pathname.startsWith(`${base}/jobs/`));
+          const count =
+            item.badge === "approvals"
+              ? Math.max(
+                  0,
+                  approvalsCount - Object.keys(state.decisions).length,
+                )
+              : 0;
 
           return (
             <li key={item.href} className="shrink-0 lg:shrink">

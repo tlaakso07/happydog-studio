@@ -1,10 +1,6 @@
-import { ComingSoon } from "@/components/shell/coming-soon";
+import { ApprovalScreen } from "@/components/studio/approval-screen";
 
-export default function Page() {
-  return (
-    <ComingSoon
-      title="Approvals"
-      sentence="The queue where you approve, redo or skip each finished ad. It arrives next."
-    />
-  );
+export default async function Page({ params }: PageProps<"/w/[slug]/approvals">) {
+  const { slug } = await params;
+  return <ApprovalScreen base={`/w/${slug}`} />;
 }

@@ -1,10 +1,5 @@
-import { ComingSoon } from "@/components/shell/coming-soon";
+import { BrandScreen } from "@/components/studio/brand-screen";
 
 export default function Page() {
-  return (
-    <ComingSoon
-      title="Brand room"
-      sentence="Your cast, uniforms, products, trucks and world live here once your kit is in."
-    />
-  );
+  return <BrandScreen />;
 }

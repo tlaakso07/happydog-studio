@@ -34,6 +34,8 @@ The full product design is `docs/BUILD-PLAN.md`, 17 sections. Section 4 is the r
 
 ## What exists right now
 
+The Codex continuation adds five connected owner-screen previews. Start at `/w/northline-windows/create`; Script and Storyboard use `/w/northline-windows/jobs/heating-outdoors/script` and `/scenes`. Brand Room and Approval Queue are linked in the sidebar. These are sample-data surfaces: edits and decisions persist during navigation but reset on reload. See the newest `HANDOFF.md` entry and `docs/APP-REVIEW.md`.
+
 - `/w/[slug]` Studio Home, built against the approved render. This is the reference implementation. Match its patterns.
 - The shell: the rail, the allowance card, the honest empty states behind every nav link.
 - Design tokens in `apps/web/app/globals.css`. Three fonts wired in `apps/web/app/layout.tsx`.
@@ -41,7 +43,7 @@ The full product design is `docs/BUILD-PLAN.md`, 17 sections. Section 4 is the r
 
 ## What does not exist
 
-Auth, the Supabase client wiring, migration 0004 (jobs, renders, approvals), the worker, the gateway, the engine, and the five neighbouring screens. The `packages/` directories are empty shells.
+Auth, the Supabase client wiring, migration 0004 (jobs, renders, approvals), the worker, the gateway, the engine, and real media playback. The `packages/` directories are empty shells. The five neighbouring screens now exist as visual previews with local interactions, not connected production workflows.
 
 This matters because it changes what "done" means. If a screen you are asked to build reads tables that migration 0004 would create, build it against a typed fixture shaped like the real query, the way `apps/web/lib/studio-home.ts` does. One function, one typed object. Do not build a mock provider, a repository layer, or a data abstraction. Swapping that single function for the real query should be the entire migration.
 

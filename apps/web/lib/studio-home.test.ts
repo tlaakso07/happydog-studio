@@ -53,6 +53,6 @@ test("no em dash reaches an owner-facing string", () => {
     ...base.recent.map((r) => `${r.title} ${r.format}`),
   ];
   for (const s of strings) {
-    assert.ok(!s.includes("—"), `em dash in: ${s}`);
+    assert.ok(!s.includes("\u2014"), `em dash in: ${s}`);
   }
 });
