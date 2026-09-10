@@ -31,11 +31,11 @@ export async function createTestDatabase() {
     grant execute on function auth.uid() to anon, authenticated;
   `);
   for (const migration of [
-    "0001_tenancy.sql",
-    "0002_brand_system.sql",
-    "0003_offers_library.sql",
-    "0006_storage.sql",
-    "0008_access_foundation.sql",
+    "20260905054542_0001_tenancy.sql",
+    "20260905054627_0002_brand_system.sql",
+    "20260910063730_0003_offers_library.sql",
+    "20260910063731_0006_storage.sql",
+    "20260910063732_0008_access_foundation.sql",
   ]) {
     await db.exec(
       await readFile(

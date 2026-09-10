@@ -4,7 +4,7 @@ September 9, 2026. Trevor authorized implementation in priority order. Preserve 
 
 | Order | Milestone | Deliverable | Current state |
 | --- | --- | --- | --- |
-| 1 | Account and company foundation | Verified login, company access, Agency HQ company creation, invitations, saved company records, and tenant relationship constraints | First code batch implemented and locally verified; hosted migration, email configuration, and live activation pending |
+| 1 | Account and company foundation | Verified login, company access, Agency HQ company creation, invitations, saved company records, and tenant relationship constraints | Code locally verified; hosted migrations and transactional access smoke test complete; email configuration, first operator, and browser sign-in pending |
 | 2 | Approved brand foundation | Immutable brand contents and source assets, upload intake, agency editing, six books, owner sign-off, version changes | Next |
 | 3 | Website to design system | Firecrawl intake, evidence review, missing-design proposals, OpenAI concepts, reusable starter templates and approved export | Planned |
 | 4 | Offers and durable ad workflow | Offer editor, saved briefs/jobs, allowance ledger, current-version approval gates, progress and notifications | Planned |
@@ -22,7 +22,8 @@ September 9, 2026. Trevor authorized implementation in priority order. Preserve 
 - [x] Same-company relationship constraints for brand, intake, voice, source, footage, library, and enterprise links, plus asset-path ownership.
 - [x] Explicit local sample mode; real company workspaces cannot inherit Northline's fixture content or decisions.
 - [x] Local SQL tests and browser workflows through the actual application with simulated Auth transport and isolated PostgreSQL.
-- [ ] Authenticate the Supabase CLI, compare remote migration history, and apply the migration against the intended environment.
+- [x] Authenticate the Supabase CLI, compare remote migration history, and apply the migration against the intended environment.
+- [x] Verify hosted company isolation, invitation acceptance, RLS, and private buckets using rolled-back test fixtures.
 - [ ] Configure production origin, email delivery/templates, and the first agency membership; run hosted sign-in and multi-company smoke tests.
 - [ ] Automated invitation email delivery, membership revocation UI, broader Agency HQ operations, and immutable brand-content guards remain in the launch checklist. The current invitation form explicitly saves an invitation and asks the agency to share the sign-in address.
 

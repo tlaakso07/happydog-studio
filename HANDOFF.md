@@ -2,6 +2,14 @@
 
 Live state ledger. Newest at the top. Read AGENTS.md first.
 
+## 2026-09-09 · Supabase connected and database foundation applied
+
+- Trevor opened Supabase in Chrome and explicitly authorized CLI connection and project administration. Completed the official CLI browser-verification flow; the CLI now manages its own credential outside the repository. Linked this checkout to the verified, healthy `happydog-studio` project `chlzykttnwhnqbtpyohb`.
+- Remote migration history contained timestamped versions of 0001 and 0002. Compared their stored SQL with local files, equivalent except comments/whitespace. Renamed local migrations to canonical timestamps, retaining the original numeric labels, and updated SQL test fixtures. Did not rewrite remote migration history.
+- Preflight found no Auth users, companies, organizations, kit assets, brand systems/entities/traits/voices, invitations, or storage buckets. CLI dry run selected exactly the pending 0003, 0006, and 0008 migrations. Applied all three successfully.
+- All nine local SQL scenarios pass. Added and ran `supabase/tests/hosted-access-smoke.sql`: hosted owner/agency isolation, invitation creation/acceptance/retry, RLS, anonymous function denial, and private buckets pass inside a transaction that rolls all fixtures back. No email was sent.
+- Account email settings, first verified agency operator, actual hosted browser sign-in, and email delivery validation remain pending. Local port 3100 still shows the Northline preview. No customer-facing web deployment occurred. Next product batch remains immutable brand contents and source uploads.
+
 ## 2026-09-09 · Build started: account and company foundation
 
 - Trevor authorized prioritizing and implementing the remaining work. `docs/BUILD-ORDER.md` records the dependency order. Preserve current navigation and six books; UI redesign remains deferred.

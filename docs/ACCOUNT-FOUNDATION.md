@@ -22,14 +22,34 @@ Next.js reads web configuration from `apps/web/.env.local` for local development
 - Set `NEXT_PUBLIC_SUPABASE_URL` and either `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` or the existing `NEXT_PUBLIC_SUPABASE_ANON_KEY`.
 - `NEXT_PUBLIC_APP_URL` must be the full trusted origin. HTTPS is required outside localhost. Auth redirects use this configured origin, not an arbitrary request header or submitted URL.
 
-The existing sibling checkout supplied only public Supabase configuration to the ignored local environment file. The production database was not modified. Supabase CLI inspection reported that no access token is configured.
+The existing sibling checkout supplied only public Supabase configuration to the ignored local environment file. The Supabase CLI is now authenticated and this checkout is linked to `happydog-studio`, project `chlzykttnwhnqbtpyohb`. Credentials are managed by the CLI and are not stored in the repository. The local app remains in preview mode until hosted Auth setup and the first operator are ready.
 
-## Hosted activation, in order
+## Hosted database activation: September 9, 2026
 
-1. Sign in with `supabase login` on this Mac, or configure a management token locally through the normal CLI workflow. Do not include tokens in commits, shell history shared with others, or chat.
-2. Verify the existing Happy Dog project and remote migration history before linking or pushing. Compare it with local migrations 0001, 0002, 0003, 0006, and 0008. The historical numbering has gaps; do not reset the project or assume every file is applied.
-3. Review migration 0008 against existing data. Audit cross-company references and kit paths before applying; invalid rows should cause a reviewable failure rather than be silently rewritten. Old invitation expiry is based on its original creation time, not the migration date.
-4. Apply migrations through the Supabase CLI to the selected staging/production environment after that comparison. Verify constraints, RLS, function grants, and a two-company access test in the hosted system.
+Trevor authorized connecting the CLI and administering the app's existing project. Verified its identity, healthy status, migration history, and empty application/Auth/storage data before deployment. The original two migrations had timestamp versions in Supabase but short local filenames. Their stored SQL matched the local files after excluding comments and whitespace. Aligned local filenames to the existing remote versions without rewriting remote history, then assigned ordered timestamps to the three pending migrations.
+
+| Migration | Canonical version | Hosted state |
+| --- | --- | --- |
+| 0001 tenancy | 20260905054542 | Previously applied, verified |
+| 0002 brand system | 20260905054627 | Previously applied, verified |
+| 0003 offers and library | 20260910063730 | Applied |
+| 0006 private storage | 20260910063731 | Applied |
+| 0008 account foundation | 20260910063732 | Applied |
+
+The migration filenames retain the original numbers as labels after their timestamp. Earlier references to `0008_access_foundation.sql` mean `supabase/migrations/20260910063732_0008_access_foundation.sql`.
+
+The CLI dry run selected only the three pending migrations. All nine local SQL scenarios passed before deployment. `supabase/tests/hosted-access-smoke.sql` then passed on hosted Supabase: owner isolation and denied company creation, agency access, invitation creation and verified acceptance with safe retries, public-table RLS, anonymous invitation denial, and private media buckets. It runs inside a transaction and rolls back every test account and company. No emails were sent. This SQL check does not establish email deliverability or a real browser login session.
+
+```sh
+supabase db query --linked --file supabase/tests/hosted-access-smoke.sql --output json
+```
+
+## Hosted activation checklist
+
+1. Complete: CLI sign-in through Supabase's official browser verification flow.
+2. Complete: verified and linked the existing project; matched migration SQL and aligned filenames with remote history. No database reset or history repair was used.
+3. Complete: preflight found no users, companies, brand data, kit assets, invitations, or buckets to migrate. Old invitation expiry still uses its original creation time.
+4. Complete: pending migrations applied through the CLI; hosted transaction checked company access, RLS, function grants, and private buckets.
 5. Configure the trusted app origin and exact allowed callback URL in Supabase Auth. For token-hash email templates, use the server confirmation route with the appropriate email/invite type. Follow the official server-side Auth template guide.
 6. Configure and test the selected email sender and provider rate limits. Account creation alone must not grant company access. Public magic-link abuse protection/rate limiting and SMTP deliverability need hosted validation before inviting users.
 7. Provision the first verified agency operator through an operator-controlled CLI process in the correct organization/workspace. Agency HQ intentionally cannot let an arbitrary new account grant itself the first agency role. Never infer the operator identity from a submitted form or an email domain.
