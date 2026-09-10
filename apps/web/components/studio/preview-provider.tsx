@@ -41,3 +41,7 @@ export function useStudioPreview() {
   if (!context) throw new Error("The workspace preview provider is missing.");
   return context;
 }
+
+export function useOptionalStudioPreview() {
+  return useContext(PreviewContext);
+}

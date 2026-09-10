@@ -2,6 +2,17 @@
 
 Live state ledger. Newest at the top. Read AGENTS.md first.
 
+## 2026-09-09 · Build started: account and company foundation
+
+- Trevor authorized prioritizing and implementing the remaining work. `docs/BUILD-ORDER.md` records the dependency order. Preserve current navigation and six books; UI redesign remains deferred.
+- Added login/PKCE/token-hash callbacks, cookie refresh proxy, sign-out, verified request-level membership checks, company chooser, explicit invitation acceptance, Agency HQ company creation, invitation saving/revocation, and real company shells without fixture leakage.
+- Local sample mode now requires `STUDIO_MODE=preview`; live is the default and fails closed without configuration. An ignored `apps/web/.env.local` keeps the current Northline preview available and copies only public Supabase values from the prior checkout. Vercel production cannot use the preview flag.
+- Added migration 0008 for invitation lifecycle and verified acceptance, atomic company creation, same-company relation constraints, asset-path ownership, and immutable company organization. Brand child/source immutability remains the next batch. Migration is tested locally, not applied to the hosted project.
+- Added embedded PostgreSQL tests using PGlite with actual migrations and SQL roles. Added a localhost-only simulated-Auth browser fixture backed by the isolated SQL database; it is never deployed and sends no emails.
+- Added a GitHub Actions check for lint, web/SQL tests, and a Webpack production build using Node 22. No cloud secrets are required for those checks.
+- Validation: 15 web tests and 9 SQL scenarios pass; TypeScript and ESLint pass; Webpack production build passes. Turbopack hit a local process/port permission failure. Browser checks passed for login/callback/session persistence, sign-out, company/role denial, company creation, invitation save/accept/reload, and desktop/mobile layouts with simulated Auth and real isolated SQL.
+- Supabase CLI has no management access token, so remote schema/account state has not been modified. Invitation email delivery, hosted Auth configuration, first agency provisioning, membership revocation UI, and hosted smoke tests remain open. `docs/ACCOUNT-FOUNDATION.md` contains activation instructions. No real invitation was sent.
+
 ## 2026-09-09 · Launch readiness checklist
 
 - Trevor deferred UI/UX redesign, asked to inspect the actual app, then requested everything required before giving it to users. Preserve all navigation/features and six books; do not implement the reduced navigation from generated concepts.

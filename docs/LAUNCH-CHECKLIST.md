@@ -2,6 +2,8 @@
 
 September 9, 2026. Based on the running app, repository, application review, and current branding/website plans. This is a delivery checklist, not a claim that the production accounts or services have been audited.
 
+Implementation is now underway in [BUILD-ORDER.md](BUILD-ORDER.md). The account foundation is locally implemented and tested; the launch checkboxes below remain open until their hosted behavior and release conditions are verified. See [ACCOUNT-FOUNDATION.md](ACCOUNT-FOUNDATION.md).
+
 ## Scope and checkpoints
 
 Trevor wants to preserve the full app scope. UI redesign is deferred. Do not apply the five-destination navigation recommendation from earlier concept documents or remove any of the six brand books. Keeping a feature in scope does not mean its placeholder is finished.

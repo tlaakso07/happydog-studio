@@ -2,6 +2,8 @@
 
 ## Current direction, September 9, 2026
 
+Implementation has started in the sequence tracked by [BUILD-ORDER.md](BUILD-ORDER.md). Batch 1 adds accounts, company access, Agency HQ creation/invitations, and tenant relationship constraints; hosted activation remains pending. See [ACCOUNT-FOUNDATION.md](ACCOUNT-FOUNDATION.md).
+
 Launch readiness is tracked in [LAUNCH-CHECKLIST.md](LAUNCH-CHECKLIST.md). Trevor has deferred UI redesign and wants the full navigation and feature scope preserved. Earlier five-destination navigation proposals are not approved. Pilot versus full-release sequencing is explicitly labeled in the checklist.
 
 Trevor has selected OpenAI / ChatGPT images and Seedance 2.5 as the front-runners, and real employees plus recurring synthetic cast approved per company. Read [BRAND-WORKFLOW-PLAN.md](BRAND-WORKFLOW-PLAN.md) for the current workflow proposal, brand acceptance gates, provider verification, and implementation exit criteria. It supersedes conflicting provider priorities and timing assumptions below. The earlier provider inventory is historical context, not proof of present API access. The screens are currently sample-data previews; no production generation pipeline exists yet.

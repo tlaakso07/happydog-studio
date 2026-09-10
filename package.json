@@ -1,7 +1,9 @@
 {
   "name": "happydog-studio",
   "private": true,
-  "engines": { "node": ">=22" },
+  "engines": {
+    "node": ">=22"
+  },
   "packageManager": "pnpm@11.9.0",
   "scripts": {
     "dev": "pnpm --filter @studio/web dev",
@@ -9,6 +11,10 @@
     "build": "pnpm -r build",
     "lint": "pnpm -r lint",
     "test": "pnpm -r test",
+    "test:db": "node --test supabase/tests/*.test.mjs",
     "db:types": "supabase gen types typescript --linked > packages/db/src/database.ts"
+  },
+  "devDependencies": {
+    "@electric-sql/pglite": "^0.5.8"
   }
 }
