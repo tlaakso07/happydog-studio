@@ -5,6 +5,7 @@ import { createHmac } from "node:crypto";
 import { createTestDatabase, U } from "./fixtures.mjs";
 
 const db = await createTestDatabase();
+const consumedEmailHashes = new Set();
 const now = Math.floor(Date.now() / 1000);
 const encode = (value) =>
   Buffer.from(JSON.stringify(value)).toString("base64url");
@@ -86,10 +87,12 @@ createServer(async (req, res) => {
       return body.auth_code === "valid-owner-code"
         ? send(200, sessions.owner)
         : send(400, { error: "invalid_grant" });
-    if (url.pathname === "/auth/v1/verify")
-      return body.token_hash === "valid-owner-hash"
-        ? send(200, sessions.owner)
-        : send(400, { error: "invalid_token" });
+    if (url.pathname === "/auth/v1/verify") {
+      if (body.token_hash !== "valid-owner-hash" || consumedEmailHashes.has(body.token_hash))
+        return send(400, { error: "invalid_token" });
+      consumedEmailHashes.add(body.token_hash);
+      return send(200, sessions.owner);
+    }
     if (url.pathname === "/auth/v1/logout") return send(200, {});
     if (!session)
       return send(401, { message: "Authentication required", code: "401" });

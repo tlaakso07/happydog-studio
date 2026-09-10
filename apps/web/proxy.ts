@@ -6,7 +6,7 @@ export async function proxy(request: NextRequest) {
   let response = NextResponse.next({ request });
   // Do not cache private pages or any auth cookie exchange, including redirects.
   response.headers.set("Cache-Control", "private, no-store");
-  response.headers.set("Referrer-Policy", "same-origin");
+  response.headers.set("Referrer-Policy", "no-referrer");
   const config = getAuthConfig();
   if (!config || isPreviewMode()) return response;
   const supabase = createServerClient(config.url, config.key, {

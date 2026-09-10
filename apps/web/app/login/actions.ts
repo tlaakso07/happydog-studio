@@ -40,7 +40,7 @@ export async function requestSignIn(
   return {
     status: "success",
     message:
-      "Check your email for a sign-in link. Open it in this browser to continue.",
+      "Check your email and open the newest sign-in link. Then select Continue to my studio.",
   };
 }
 

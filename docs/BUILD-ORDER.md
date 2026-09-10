@@ -4,7 +4,7 @@ September 9, 2026. Trevor authorized implementation in priority order. Preserve 
 
 | Order | Milestone | Deliverable | Current state |
 | --- | --- | --- | --- |
-| 1 | Account and company foundation | Verified login, company access, Agency HQ company creation, invitations, saved company records, and tenant relationship constraints | Code locally verified; hosted migrations and transactional access smoke test complete; email configuration, first operator, and browser sign-in pending |
+| 1 | Account and company foundation | Verified login, company access, Agency HQ company creation, invitations, saved company records, and tenant relationship constraints | Code locally verified; hosted migrations and transactional access smoke test complete; Resend SMTP configured; delivery verification, first operator acceptance, and browser sign-in pending |
 | 2 | Approved brand foundation | Immutable brand contents and source assets, upload intake, agency editing, six books, owner sign-off, version changes | Next |
 | 3 | Website to design system | Firecrawl intake, evidence review, missing-design proposals, OpenAI concepts, reusable starter templates and approved export | Planned |
 | 4 | Offers and durable ad workflow | Offer editor, saved briefs/jobs, allowance ledger, current-version approval gates, progress and notifications | Planned |

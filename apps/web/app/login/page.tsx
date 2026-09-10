@@ -1,7 +1,9 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { LoginForm } from "@/components/auth/login-form";
 import { Wordmark } from "@/components/shell/wordmark";
 import { getAuthConfig, isPreviewMode, safeNext } from "@/lib/auth/config";
+import { getAccount } from "@/lib/auth/access";
 
 export const dynamic = "force-dynamic";
 
@@ -9,6 +11,7 @@ export default async function Login({ searchParams }: PageProps<"/login">) {
   const params = await searchParams;
   const preview = isPreviewMode();
   const enabled = Boolean(getAuthConfig()) && !preview;
+  if (enabled && (await getAccount())) redirect(safeNext(params.next));
   return (
     <main className="flex min-h-screen items-center justify-center bg-paper px-5 py-12">
       <section className="w-full max-w-[440px] rounded-xl border border-line bg-surface p-8">
@@ -21,8 +24,8 @@ export default async function Login({ searchParams }: PageProps<"/login">) {
         </p>
         {params.error === "link" && (
           <p role="alert" className="mt-4 text-sm text-secondary-ink">
-            This sign-in link could not be used. Request a new link and try
-            again.
+            This sign-in link expired or could not be completed. Request a new
+            link below, then open the newest email.
           </p>
         )}
         {!enabled && (

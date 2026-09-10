@@ -2,6 +2,51 @@
 
 Live state ledger. Newest at the top. Read AGENTS.md first.
 
+## 2026-09-10 · Cross-browser email sign-in fix activated
+
+- Execution approval recovered. Ran the isolated HTTP regression against the Next app and fake Auth/PGlite fixture: scanner GET, sign-in without a requesting-browser cookie, session persistence, authenticated login redirect, one-time reuse rejection, and expired/malformed links all pass. No real accounts or emails were used by that regression.
+- Read hosted Auth settings and confirmed both emails still used ConfirmationURL. Applied the prepared four-field patch in supabase/operations/email-template-config.json for magic-link and signup confirmation templates and subjects. An independent GET matches all four fields exactly; SMTP credentials/settings, confirmation requirements, rate limit, site URL, and redirect allow list are unchanged.
+- Both templates now direct the recipient to /auth/confirm using TokenHash and type=email. The app stages an HttpOnly cookie and requires Continue to my studio before verifyOtp consumes the token. Removed the same-browser requirement from login instructions and synced the running /tmp/studio-live-session checkout. Older already-sent messages retain their old links.
+- Sent one fresh authorized sign-in email to Trevor's chosen business address through the public Supabase OTP endpoint with create_user=false. Supabase returned HTTP 200. Inbox receipt, Trevor's real session, and first agency invitation acceptance still await his completion; do not claim those are verified. Do not send another email unless needed because it can invalidate the current link.
+- Prior unit tests (15), lint, route type generation, and TypeScript pass; full HTTP regression now passes too. No hosted membership was bypassed or granted by this repair.
+
+## 2026-09-10 · Completion authorized; execution approval service unavailable
+
+- Trevor explicitly said "complete it", authorizing completion of testing and hosted email-template activation. Do not ask for the same authorization again.
+- Retried the isolated HTTP regression launch and its one permitted retry. Both were rejected before process creation because automatic approval review did not finish before its deadline. Retried the authorized Supabase configuration read once in this resumed turn; it also timed out before execution. No hosted settings were changed and the isolated HTTP regression still has not run.
+- Read-only local verification confirms all seven edited auth files match the running /tmp/studio-live-session checkout. The prepared JSON patch matches the reviewed HTML and changes only two email-template bodies and two subjects. Existing unit, lint, and TypeScript results from the previous entry still apply; no new app code changed this turn.
+- Resume when execution approval is functioning: run the isolated regression, apply and GET-verify supabase/operations/email-template-config.json to the existing project, remove the same-browser instruction from the login success copy in both authoritative and runtime checkouts, then request/verify a fresh real email. User permission is already recorded. The first agency invitation still requires verified sign-in and explicit acceptance.
+
+## 2026-09-10 · Email callback loop diagnosed; cross-browser fix prepared
+
+- Trevor reported an email link returning to the send-link screen. Sanitized development server output confirms POST /login, an Auth callback containing a code, then /login?error=link. A repeated email-link attempt returned access_denied with an invalid/expired-link description. Current PKCE exchange depends on the requesting browser's verifier cookie; a browser change is consistent with these symptoms, but the exact first exchange error was not logged. Do not claim the cookie mismatch is proven.
+- Prepared cross-browser token-hash sign-in: GET /auth/confirm stages an HttpOnly, SameSite=Lax, ten-minute cookie scoped to /auth and redirects to a clean /auth/continue URL. Explicit server-action POST consumes the token with verifyOtp, removes the pending cookie, and stores the verified session. GET alone cannot consume the link. Signed-in users now leave /login; expired-link guidance tells users to request the newest email. Auth referrers are suppressed.
+- Added `supabase/templates/sign-in.html` and a concrete Management API PATCH body in `supabase/operations/email-template-config.json`, covering magic-link and new-account confirmation emails. These templates are NOT applied to hosted Supabase. Automatic approval timed out twice on reading existing template configuration; stop retrying until new user guidance/approval. Existing SMTP credential and verified domain remain configured.
+- Synced the app changes to the running temporary checkout at /tmp/studio-live-session. The main Documents checkout remains authoritative. Login instructions still require the same browser until hosted templates are changed.
+- Validation: all 15 existing web tests, ESLint, route type generation, and TypeScript pass in temporary checkouts. Added `supabase/tests/email-link-smoke.mjs` for scanner GET, fresh-browser completion, session persistence, login redirect, reused/expired/malformed links. Fixture now models one-time token consumption. Full HTTP regression run requires two local test servers; sandbox denied their listening ports and the escalation approval timed out before execution. No hosted token was generated or consumed by the assistant.
+- Immediate recovery: request a NEW email in Chrome and open the newest email link in that same Chrome profile. Existing used links cannot be repaired. Next: complete isolated HTTP checks, apply and verify the prepared hosted template patch, update the login success copy to remove the same-browser restriction, then have Trevor use a fresh email to verify real sign-in and accept the prepared agency invitation.
+
+## 2026-09-10 · Resend SMTP connected; real sign-in verification remains
+
+- Trevor explicitly approved creating the scoped credential and storing it in Supabase SMTP. Created `Studio Supabase Auth` with Sending access limited to `mail.laaksolabs.com`, then saved it in the existing project's email settings. The secret was not written to chat or repository files.
+- Independently verified hosted settings through the Management API: smtp.resend.com, port 465, username resend, sender Studio <studio@mail.laaksolabs.com>, 30 emails/hour, email confirmation required. The sending domain and all three DNS records are verified.
+- Enabled STUDIO_MODE=live in the ignored local environment. iCloud offloaded repository/build files and reported insufficient storage quota. Started the same pushed branch from temporary checkout `/tmp/studio-live-session`, using Next dev with webpack on 127.0.0.1:3100; server reported Ready. Main workspace remains authoritative; no product code was changed in the temporary checkout.
+- Browser automatic approval timed out twice while reconnecting to the existing Chrome Studio tab. Stopped browser attempts as required. No real sign-in email has been sent, delivery has not been tested, and the first agency invitation remains unaccepted. Next: user completes sign-in or authorizes browser reconnection, then verify email delivery, session persistence, and invitation acceptance. Do not recreate the credential or rerun the bootstrap.
+- Supabase organization still showed an over-quota warning with restrictions scheduled from September 11 if unresolved. Billing remains unchanged. Resolve hosted quota and local iCloud storage separately before relying on these environments.
+
+## 2026-09-10 · Sending domain verified; scoped SMTP credential awaiting approval
+
+- Trevor explicitly approved saving the three DNS records. Saved DKIM TXT and both sending CNAME records in Squarespace with default four-hour TTL. Public DNS resolves all three, and Resend now reports domain and records Verified. Google Workspace MX/SPF/DKIM and website records remain intact.
+- Prepared `Studio Supabase Auth` API key with Sending access restricted to `mail.laaksolabs.com` in Resend tab 1759128977. Did not click Add. Asked action-time approval to create the credential and store it in Supabase SMTP. No answer yet.
+- Supabase tab 1759129031 has an unsaved SMTP draft: sender `studio@mail.laaksolabs.com`, name Studio, host smtp.resend.com, port 465, username resend. The password must be replaced with the newly approved credential before saving. AX hides some input values even when filled; do not append text based solely on missing AX values. No SMTP setting has been saved.
+- Resend verified domain tab 1759129028 retained. SMTP connection, actual sign-in email, live-mode activation, and invitation acceptance remain pending. No new credential or email created in this session.
+- Supabase dashboard shows organization over-quota warning, with restrictions from September 11, 2026 if unresolved. No billing or quota changes made. See `docs/EMAIL-SETUP.md`.
+
+## 2026-09-10 · DNS additions reviewed and staged
+
+- Trevor signed into Squarespace. Reviewed the live zone: Squarespace website defaults plus existing Google Workspace MX, SPF, and DKIM; no proposed Resend names conflict. Completed Squarespace's required Google reauthentication using the existing business-account session.
+- The first TXT record is filled in on Chrome tab 1759128980 but has not been saved. All three additions are documented in `docs/EMAIL-SETUP.md`. Awaiting required action-time confirmation before authorizing Resend domain sending through the DNS additions. No DNS or SMTP changes have been applied in this session.
+
 ## 2026-09-10 · Resend sender prepared; Squarespace login pending
 
 - Trevor completed Resend signup and reported he was signed in. Verified the account in Chrome. Added `mail.laaksolabs.com` as an unverified sending domain in North Virginia; receiving stays disabled. No API key was created and Supabase SMTP is not yet connected.

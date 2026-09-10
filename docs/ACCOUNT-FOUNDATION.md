@@ -4,7 +4,7 @@
 
 - `/login`: validated magic-link form and explicit unconfigured/preview states.
 - `/auth/callback`: PKCE exchange with internal-only return paths.
-- `/auth/confirm`: token-hash email/invite confirmation; tokens are removed from the destination URL.
+- `/auth/confirm`: stages a token-hash email/invite link in an HttpOnly cookie and redirects to a clean `/auth/continue` page. Explicit POST verifies the token, so GET previews cannot consume it. Both hosted email templates are activated and independently verified.
 - `/workspaces`: verified account, visible memberships, invitation review and acceptance, company switching, sign-out.
 - `/hq`: agency-only company list, transactional company creation, role-specific invitations, pending invitation list and revocation. Saving an invitation does not send an email; this is stated in the form.
 - `/w/[slug]`: authenticated live company shell and honest setup states. Sample screens remain accessible in explicit local preview mode. No customer company receives Northline sample people, offers, approvals, or usage counts.
@@ -22,7 +22,7 @@ Next.js reads web configuration from `apps/web/.env.local` for local development
 - Set `NEXT_PUBLIC_SUPABASE_URL` and either `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` or the existing `NEXT_PUBLIC_SUPABASE_ANON_KEY`.
 - `NEXT_PUBLIC_APP_URL` must be the full trusted origin. HTTPS is required outside localhost. Auth redirects use this configured origin, not an arbitrary request header or submitted URL.
 
-The existing sibling checkout supplied only public Supabase configuration to the ignored local environment file. The Supabase CLI is now authenticated and this checkout is linked to `happydog-studio`, project `chlzykttnwhnqbtpyohb`. Credentials are managed by the CLI and are not stored in the repository. The local app remains in preview mode until hosted Auth setup and the first operator are ready.
+The existing sibling checkout supplied only public Supabase configuration to the ignored local environment file. The Supabase CLI is now authenticated and this checkout is linked to `happydog-studio`, project `chlzykttnwhnqbtpyohb`. Credentials are managed by the CLI and are not stored in the repository. The local app is in live mode; first-operator sign-in and invitation acceptance remain pending.
 
 ## Hosted database activation: September 9, 2026
 
@@ -44,7 +44,7 @@ The CLI dry run selected only the three pending migrations. All nine local SQL s
 
 The first operator has now chosen their email in the task. An operator-only bootstrap saved a seven-day agency invitation in the new `agency-setup` workspace under Happy Dog Media. That workspace is for administration and has zero ad allowance. `supabase/operations/prepare-first-agency.sql` documents the executed operation and refuses to run against an application database that already contains organizations, workspaces, memberships, or invitations. Email verification and explicit acceptance remain required before agency access is granted.
 
-The hosted Auth site URL is now `http://127.0.0.1:3100`, with exact callback URLs for the root, HQ, and workspace chooser return paths. No custom SMTP sender is configured. Supabase's default sender cannot send to the selected business email because it is not a Supabase organization-member address. Resend signup is open for the operator to complete; domain verification, SMTP connection, a real sign-in email, and live-mode activation remain pending.
+The hosted Auth site URL is now `http://127.0.0.1:3100`, with exact callback URLs for the root, HQ, and workspace chooser return paths. Resend domain verification and custom SMTP configuration are complete with an approved sending-only credential scoped to mail.laaksolabs.com. Local live mode is enabled. Cross-browser email templates are active and isolated HTTP sign-in regression passes. One fresh email request was accepted by Supabase; actual receipt, real sign-in, and agency invitation acceptance remain pending. See `docs/EMAIL-SETUP.md` for verified settings and the temporary local server location.
 
 Sources: [Supabase default sender limitations](https://supabase.com/docs/guides/auth/auth-smtp), [Resend integration](https://supabase.com/partners/resend).
 

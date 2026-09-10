@@ -1,6 +1,6 @@
 # Studio email sender setup
 
-Status: Resend account created by Trevor. Sending domain added, DNS verification and Supabase SMTP connection pending. No email has been sent.
+Status: DNS and Resend SMTP are verified. The cross-browser sign-in fix and both hosted email templates are activated and independently verified. Isolated sign-in regression passes. A fresh email request for the first operator returned HTTP 200; real inbox receipt, sign-in, and invitation acceptance await user completion.
 
 ## Prepared domain
 
@@ -17,9 +17,9 @@ These are the exact records Resend displayed on September 10, 2026. Names are re
 
 | Type | Name | Value | TTL |
 | --- | --- | --- | --- |
-| TXT | `resend._domainkey.mail` | Public DKIM key below | Default |
-| CNAME | `rsend.mail` | `rsend.forge.rmta.net` | Default |
-| CNAME | `send.mail` | `send.forge.rmta.net` | Default |
+| TXT | `resend._domainkey.mail` | Public DKIM key below | 4 hours |
+| CNAME | `rsend.mail` | `rsend.forge.rmta.net` | 4 hours |
+| CNAME | `send.mail` | `send.forge.rmta.net` | 4 hours |
 
 Public DKIM value, not a secret:
 
@@ -29,12 +29,25 @@ p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDsK1no6ArT4Y4BPUSBHyaftl8jKLQkpQ/vG6FeaU
 
 The proposed changes authorize Resend to send from the dedicated subdomain. Existing website records, root mail delivery, and root DMARC policy are outside these three changes. Resend receiving is disabled. The optional root `_dmarc` suggestion was not selected or applied.
 
-## Remaining steps
+## Setup progress
 
-1. Trevor signs into the Squarespace account managing the domain. Chrome tab 1759128980 is open at login.
-2. Review existing DNS records and save the three prepared additions after the required browser-action confirmation for authorizing domain sending.
-3. Verify the domain in Resend. DNS propagation may take time.
-4. Connect the Resend Supabase integration to `happydog-studio` with a sending credential. Keep secrets out of chat and repository files.
-5. Check hosted Auth configuration, activate local live mode, send the requested sign-in email, and have Trevor complete verified sign-in and agency invitation acceptance.
+1. Complete: Trevor signed into Squarespace; fresh Google account verification completed where required.
+2. Complete: Trevor approved the three additions. Saved them without changing Google Workspace or website records.
+3. Complete: public DNS resolves all three exact values, and Resend reports Verified.
+4. Complete: Trevor approved creation of `Studio Supabase Auth` with Sending access limited to `mail.laaksolabs.com`. Saved it as the SMTP password for `happydog-studio`. Host `smtp.resend.com`, port 465, username `resend`, sender `Studio <studio@mail.laaksolabs.com>`. The secret is absent from chat and repository files.
+5. Complete: independently checked hosted Auth configuration. Custom SMTP is enabled, the email rate limit is 30 per hour, and email confirmation remains required. Activated local live mode.
+6. Complete: applied and independently verified the new email templates after isolated sign-in regression passed. Sent one fresh authorized email request, accepted by Supabase with HTTP 200. Pending: Trevor opens that newest email, selects Continue to my studio, and accepts the saved agency invitation.
 
-Resend domain setup is open in Chrome tab 1759128977. Current Studio preview remains available at port 3100.
+The live local server reported Ready at port 3100 from `/tmp/studio-live-session`, a temporary checkout of the same pushed branch. iCloud offloaded files in the main Documents checkout and reported insufficient quota. Main workspace remains the source of truth; the temporary server is for this session only.
+
+Supabase displays an organization quota warning: projects will be restricted from September 11, 2026 if the organization remains over quota. No billing changes have been made. Investigate organization usage before relying on hosted availability.
+
+## Email-link repair activated
+
+The original hosted templates used the PKCE confirmation URL. Requesting in one browser and opening the email in another can lose the required verifier cookie. Server logs showed a failed code exchange followed by a used/expired-link response; they did not establish the precise first exchange error.
+
+Replacement HTML: `supabase/templates/sign-in.html`. Applied Management API PATCH body: `supabase/operations/email-template-config.json`. On September 10, an independent GET verified both template bodies and subjects exactly. SMTP credentials, Auth confirmation requirements, rate limit, and redirect settings remain unchanged.
+
+Both signup confirmation and magic-link emails now use SiteURL + /auth/confirm with TokenHash and type=email. The app stages the token in an HttpOnly cookie on GET, redirects to a clean URL, and consumes it only after Continue to my studio is submitted. This supports opening the new email in a different browser and prevents ordinary GET previews from using the token. Already-issued emails keep their original links.
+
+Validation: isolated HTTP checks pass for scanner GET, fresh-browser completion, session persistence, authenticated login redirect, reused links, and expired/malformed links. One new real email request was accepted after activation. Actual receipt, user sign-in, and invitation acceptance remain to be confirmed by the operator.
