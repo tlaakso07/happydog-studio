@@ -40,6 +40,14 @@ The migration filenames retain the original numbers as labels after their timest
 
 The CLI dry run selected only the three pending migrations. All nine local SQL scenarios passed before deployment. `supabase/tests/hosted-access-smoke.sql` then passed on hosted Supabase: owner isolation and denied company creation, agency access, invitation creation and verified acceptance with safe retries, public-table RLS, anonymous invitation denial, and private media buckets. It runs inside a transaction and rolls back every test account and company. No emails were sent. This SQL check does not establish email deliverability or a real browser login session.
 
+### First operator and email setup
+
+The first operator has now chosen their email in the task. An operator-only bootstrap saved a seven-day agency invitation in the new `agency-setup` workspace under Happy Dog Media. That workspace is for administration and has zero ad allowance. `supabase/operations/prepare-first-agency.sql` documents the executed operation and refuses to run against an application database that already contains organizations, workspaces, memberships, or invitations. Email verification and explicit acceptance remain required before agency access is granted.
+
+The hosted Auth site URL is now `http://127.0.0.1:3100`, with exact callback URLs for the root, HQ, and workspace chooser return paths. No custom SMTP sender is configured. Supabase's default sender cannot send to the selected business email because it is not a Supabase organization-member address. Resend signup is open for the operator to complete; domain verification, SMTP connection, a real sign-in email, and live-mode activation remain pending.
+
+Sources: [Supabase default sender limitations](https://supabase.com/docs/guides/auth/auth-smtp), [Resend integration](https://supabase.com/partners/resend).
+
 ```sh
 supabase db query --linked --file supabase/tests/hosted-access-smoke.sql --output json
 ```

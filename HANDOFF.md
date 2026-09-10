@@ -2,6 +2,14 @@
 
 Live state ledger. Newest at the top. Read AGENTS.md first.
 
+## 2026-09-10 · First agency invitation prepared; email sender needed
+
+- Trevor selected his business email for the first Studio agency account. Prepared an agency invitation for that exact address using an operator-only empty-database bootstrap. Created the Happy Dog Media organization and an `agency-setup` administration workspace with zero ad allowance. No membership is granted until Supabase verifies the email and the user accepts the invitation. No Auth user was manually confirmed and no email was sent.
+- Added `supabase/operations/prepare-first-agency.sql`, which accepts an operator email through a session setting, requires an empty application database, and creates the organization/workspace/invitation atomically. It is an operations script, not a migration. It has already run on the hosted project; do not rerun it there.
+- Updated hosted Auth site URL to `http://127.0.0.1:3100` and allowed exact callback URLs for root, HQ, and workspace chooser. The site URL was previously localhost:3000. Production origin and broader return-path coverage still need their own validation before release.
+- Hosted Auth has no custom SMTP sender. The selected business email is not an organization-member address, so Supabase's default sender cannot deliver to it. Trevor confirmed he has no app email service. Recommended Resend and opened its signup page in Chrome (tab 1759128977) for user completion. Resend signup includes accepting its terms and setting account credentials; the user must complete that step.
+- Next: finish Resend account signup, verify an authorized sending domain (prefer a dedicated subdomain), connect its Supabase SMTP integration, then enable local live mode and send the authorized sign-in email. Never paste API keys into chat. Current localhost:3100 preview remains available. Agency invitation expiry is seven days from preparation.
+
 ## 2026-09-09 · Supabase connected and database foundation applied
 
 - Trevor opened Supabase in Chrome and explicitly authorized CLI connection and project administration. Completed the official CLI browser-verification flow; the CLI now manages its own credential outside the repository. Linked this checkout to the verified, healthy `happydog-studio` project `chlzykttnwhnqbtpyohb`.
