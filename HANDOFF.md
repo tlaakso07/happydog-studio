@@ -2,6 +2,13 @@
 
 Live state ledger. Newest at the top. Read AGENTS.md first.
 
+## 2026-09-09 · Launch readiness checklist
+
+- Trevor deferred UI/UX redesign, asked to inspect the actual app, then requested everything required before giving it to users. Preserve all navigation/features and six books; do not implement the reduced navigation from generated concepts.
+- Added `docs/LAUNCH-CHECKLIST.md` with existing foundations, 14 delivery areas, recommended supported-pilot versus full-release sequencing, acceptance evidence, and a production go/no-go walkthrough.
+- Covers accounts/tenant isolation, saved data, Agency HQ, original and website brand intake, offers/jobs, script/voice timing, OpenAI stills, Seedance/worker, assembly/quality, approvals/Library/Renders, billing/support, production operations, and retained Calendar/Insights/Chat/Feed/publishing scope.
+- Source inventory confirms worker/shared packages are still absent and SQL files alone do not establish deployed backend readiness. No live service configuration was audited or changed. Updated BUILD-PLAN to point to the checklist and preserve scope.
+
 ## 2026-09-09 · Premium UI concepts for discussion
 
 - Trevor asked for a review of the current UI/UX and three premium image mockups, then discussion before building the chosen upgrades.
