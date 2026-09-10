@@ -2,6 +2,15 @@
 
 Live state ledger. Newest at the top. Read AGENTS.md first.
 
+## 2026-09-09 · Website-based brand setup added to plan
+
+- Trevor requested website URL intake using Firecrawl or an equivalent to develop a company design system, especially for smaller companies with few assets.
+- Added `docs/WEBSITE-BRAND-SETUP.md`: Start from your website in onboarding/Brand Room, source review, keep/improve direction choices, generated gap filling, template previews, approval/export, provenance, bounded ingestion, and implementation acceptance criteria.
+- Firecrawl's primary docs confirm branding extraction and page discovery capabilities. This is the preferred extraction candidate; no live import, API credentials, or paid generation was used.
+- Added Start from a website to the interactive workflow map and connected the new path to the main build/branding plans. Minimal OpenAI concepts move into company setup before the later video pilot.
+- Website observations, generated proposals, and owner approval remain separate. Sparse kits can enable designed-card ads without fabricated employee/product references. Re-imports create drafts and cannot mutate locked versions.
+- Validation: all four workflow views and 31 step details pass browser checks at 1440 and 390 pixels with no horizontal overflow or script errors. `git diff --check` passes. Application runtime remains unchanged.
+
 ## 2026-09-09 · Branding and workflow planning review
 
 - Trevor asked to strengthen the application recommendations, inspect the current workflow, and prioritize company branding. Confirmed front-runners: OpenAI / ChatGPT images and Seedance 2.5. Confirmed support for both real employees and recurring synthetic characters, approved per company.

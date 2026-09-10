@@ -6,6 +6,8 @@ Trevor has selected OpenAI / ChatGPT images and Seedance 2.5 as the front-runner
 
 ## Context
 
+Website-based onboarding is now included: paste a company URL, extract existing identity with Firecrawl, propose missing design elements, preview them, and approve a version. See [WEBSITE-BRAND-SETUP.md](WEBSITE-BRAND-SETUP.md). This supplements uploads and brings minimal image-reference generation into company setup before the full video pipeline.
+
 Trevor has a fully specified product and no code. The spec lives in four audited documents (Master Build Prompt v3, Lockbook System v4, Master Plan v13, 19-board Vision Board) and six 2K reference renders of the final screens (`~/Desktop/Happy Dog UI Concepts/v3-after-audit/`). The product: an enterprise AI ad-content web app where a home-services company's brand is locked into a per-company brand system (five lockbooks plus a Voice and Proof book), and every ad an owner asks for compiles through that system: approve the words, approve the scenes, render once, machine QA, owner approves in a queue.
 
 Decisions taken in this planning session (Trevor, 2026-09-04):

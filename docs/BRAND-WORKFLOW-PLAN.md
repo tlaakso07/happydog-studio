@@ -8,6 +8,7 @@ September 9, 2026. Implementation plan for discussion, building on `APP-REVIEW.m
 - Seedance 2.5 is the preferred video model.
 - Each company may approve real employees, recurring synthetic characters, or both.
 - Brand accuracy is a primary requirement, including the precise people, garments, marks, products, vehicles, voice, and claims.
+- Company setup must support pasting a website URL and building a proposed design system when existing assets are sparse. Firecrawl is the preferred extraction candidate; see [WEBSITE-BRAND-SETUP.md](WEBSITE-BRAND-SETUP.md).
 
 The implementation phases and acceptance criteria below are recommendations. No live provider, database, or billing change has been made by this document.
 
@@ -23,7 +24,9 @@ Two connected processes: a company setup loop that builds approved references, a
 
 ```mermaid
 flowchart TD
-  A[Company assets and brand interview] --> B[Extract rules with source evidence]
+  W[Company website URL] --> X[Review extracted identity and proposed missing design]
+  X --> A[Company assets and brand interview]
+  A --> B[Extract rules with source evidence]
   B --> C[Agency checks and resolves conflicts]
   C --> D[Reference images and voice samples]
   D --> E[Owner approves company identity]
@@ -65,6 +68,8 @@ The current sample script is 63 whitespace-separated words. At 140 words/minute 
 The four owner script labels are sections, not necessarily four shots. Split approved copy into timed spoken segments; a section may cover several scenes. The five-scene reference can therefore stay, but each scene must explicitly reference its spoken segment or be marked silent. This replaces the conflicting rule that assumes exactly one scene per displayed script block.
 
 ## How branding gets dialed in
+
+Website setup adds a guided entry point: paste URL, review observed branding, keep or improve the look, preview the proposed design system, and approve a version. It supports small companies without complete kits. Website facts, generated suggestions, and owner approvals stay distinct. See [the website setup specification](WEBSITE-BRAND-SETUP.md) for screens, starter outputs, architecture, and acceptance checks.
 
 ### 1. Keep verified originals and approved derived references distinct
 
@@ -135,7 +140,7 @@ For real employees, use approved photographs and actual footage first. BytePlus'
 | --- | --- | --- |
 | 1. Workflow corrections | Creation labels, queue dispositions, consistent status words, timing model, exact source comparison UI | Full preview walkthrough including set-aside/restore and edit invalidation; product choices reviewed. |
 | 2. Company and brand foundation | Auth, membership, invitations, private assets, versioned brand records, immutable locks, provenance | Two-company isolation tests pass; existing-user invitations pass; a locked version and all of its references cannot be mutated. |
-| 3. One company reference package | Real kit intake, agency review, cast/outfit/product references, approved voice, owner sign-off | Each required rule has evidence; one complete reference package is approved. |
+| 3. One company reference package | Website or upload intake, extracted identity review, missing-design proposals, minimal OpenAI reference generation, agency review, owner sign-off | A sparse website can become an approved starter design system; required facts have evidence. Missing optional cast/product assets disable only dependent recipes. |
 | 4. Durable ad workflow | Jobs, script versions, measured voice timing, still review, scene approval, queue events, allowance ledger | Reloads preserve progress; stale approvals are refused; repeated requests cannot duplicate charges or jobs. |
 | 5. Preferred model adapters and pilot | OpenAI images, Seedance 2.5, asset persistence, cost records, brand checks, repair loop | Account capabilities verified; a proposed 20-shot acceptance set spans cast, wardrobe, products, lettering, and camera stress cases. Log all failures and costs. No known critical defect is accepted; unresolved outputs remain in agency review. |
 | 6. Finished delivery | Assembly, three ratios, captions, audio, playback, download and monitoring | One real ad for the first company completes every owner gate, passes delivery checks, and can be traced back to the approved brand package. |
