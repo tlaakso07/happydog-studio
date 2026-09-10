@@ -1,5 +1,7 @@
 # Account foundation: implementation and activation
 
+Current beta: `pnpm dev` opens the sample workspace without sign-in. Trevor deferred the unresolved real email login on September 10. Use `pnpm dev:live` only when intentionally resuming Auth work. See [BETA-HANDOFF.md](BETA-HANDOFF.md).
+
 ## Implemented
 
 - `/login`: validated magic-link form and explicit unconfigured/preview states.

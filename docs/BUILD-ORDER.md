@@ -1,5 +1,7 @@
 # Build order
 
+Trevor deferred real email login on September 10 after another failed sign-in. The shared beta now opens directly with `pnpm dev`; continue product work below and revisit Auth before live company access. See [BETA-HANDOFF.md](BETA-HANDOFF.md).
+
 September 9, 2026. Trevor authorized implementation in priority order. Preserve the current navigation, all six brand books, and the full feature scope. UI redesign is deferred.
 
 | Order | Milestone | Deliverable | Current state |

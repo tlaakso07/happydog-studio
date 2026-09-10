@@ -1,6 +1,6 @@
 # Studio email sender setup
 
-Status: DNS and Resend SMTP are verified. The cross-browser sign-in fix and both hosted email templates are activated and independently verified. Isolated sign-in regression passes. A fresh email request for the first operator returned HTTP 200; real inbox receipt, sign-in, and invitation acceptance await user completion.
+Status: Trevor reported another login loop after the activated templates and fresh email. Real sign-in is unresolved and deferred at his request. The shared beta now opens directly without sign-in using sample data. Resend SMTP and hosted templates remain configured; do not send further login emails while beta/product work continues. See `docs/BETA-HANDOFF.md`.
 
 ## Prepared domain
 

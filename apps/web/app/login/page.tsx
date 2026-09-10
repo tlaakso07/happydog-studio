@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { LoginForm } from "@/components/auth/login-form";
 import { Wordmark } from "@/components/shell/wordmark";
@@ -10,7 +9,8 @@ export const dynamic = "force-dynamic";
 export default async function Login({ searchParams }: PageProps<"/login">) {
   const params = await searchParams;
   const preview = isPreviewMode();
-  const enabled = Boolean(getAuthConfig()) && !preview;
+  if (preview) redirect("/w/northline-windows");
+  const enabled = Boolean(getAuthConfig());
   if (enabled && (await getAccount())) redirect(safeNext(params.next));
   return (
     <main className="flex min-h-screen items-center justify-center bg-paper px-5 py-12">
@@ -30,20 +30,10 @@ export default async function Login({ searchParams }: PageProps<"/login">) {
         )}
         {!enabled && (
           <p role="status" className="mt-5 rounded-lg bg-wash p-4 text-sm">
-            {preview
-              ? "You’re viewing the local design preview. Account sign-in is not enabled here."
-              : "Account setup is still in progress. Please contact your studio team."}
+            Account setup is still in progress. Please contact your studio team.
           </p>
         )}
         <LoginForm enabled={enabled} next={safeNext(params.next)} />
-        {preview && (
-          <Link
-            className="mt-5 inline-block text-sm text-cobalt underline"
-            href="/w/northline-windows"
-          >
-            Return to the app preview
-          </Link>
-        )}
       </section>
     </main>
   );

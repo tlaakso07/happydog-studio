@@ -2,6 +2,14 @@
 
 Live state ledger. Newest at the top. Read AGENTS.md first.
 
+## 2026-09-10 · Sign-in deferred; shared beta opens directly
+
+- Trevor reported that the fresh email still returned to the login page and explicitly requested removing sign-in from the beta so work can continue with his partner. Real email login remains unresolved, regardless of passing isolated tests. Stop pursuing Auth for now; resume the product build order.
+- `pnpm dev` and `pnpm dev:beta` now launch the existing sample workspace through a cross-platform Node runner, explicitly selecting STUDIO_MODE=preview. No keys or environment file are required. `pnpm dev:live` intentionally restores authenticated local development. Underlying production/live Auth and database RLS stay enforced; no anonymous access to real company records was introduced.
+- In sample beta mode, /login redirects straight to /w/northline-windows, as root already does. All existing navigation, owner screens and six brand books remain. The walkthrough uses sample data and resets changes on reload.
+- Added docs/BETA-HANDOFF.md with partner clone/run steps, current branch, limitations, and the deferred real-session investigation. Updated README.md and ONBOARDING.md to point partners at codex/continue-studio (draft PR #1), because main is behind this work. User will share GitHub directly; no partner messages or access grants were sent.
+- Updated ignored local environments and restarted port 3100 using the beta runner from /tmp/studio-live-session. Authoritative source remains this Documents checkout. Verified in the in-app browser that /login opens Studio Home directly without a form. Existing 15 tests, lint, TypeScript, Node runner syntax, and git diff whitespace checks pass.
+
 ## 2026-09-10 · Cross-browser email sign-in fix activated
 
 - Execution approval recovered. Ran the isolated HTTP regression against the Next app and fake Auth/PGlite fixture: scanner GET, sign-in without a requesting-browser cookie, session persistence, authenticated login redirect, one-time reuse rejection, and expired/malformed links all pass. No real accounts or emails were used by that regression.
