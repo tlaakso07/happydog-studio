@@ -2,6 +2,15 @@
 
 Live state ledger. Newest at the top. Read AGENTS.md first.
 
+## 2026-09-09 · Branding and workflow planning review
+
+- Trevor asked to strengthen the application recommendations, inspect the current workflow, and prioritize company branding. Confirmed front-runners: OpenAI / ChatGPT images and Seedance 2.5. Confirmed support for both real employees and recurring synthetic characters, approved per company.
+- Added `docs/BRAND-WORKFLOW-PLAN.md` with current-versus-proposed workflow, stronger product recommendations, enforceable brand fields, immutable references, still checks before video, measured voice timing, and phased acceptance criteria.
+- Added `docs/workflow-review.html`, an interactive planning map with current workflow, proposed production workflow, and brand-book details. This is a planning artifact outside the owner app.
+- Validation: all 25 workflow steps show the correct details at desktop and mobile widths; no horizontal overflow at 1440 or 390 pixels. `git diff --check` passes. No application code changed in this planning pass.
+- Updated `docs/BUILD-PLAN.md` to record the confirmed provider direction and link the newer plan. OpenAI's current documentation recommends GPT Image 2.5; Sunburst is the candidate for final brand-sensitive work. Seedance 2.5's selected account/API route and real-person reference eligibility still require verification before implementation.
+- Proposed workflow and database changes remain for discussion. No provider calls, billing changes, schema migrations, or runtime behavior changes were made in this planning pass. Existing synthetic-voice policy is not treated as permission to clone real employee voices.
+
 ## 2026-09-09 · Codex continuation and five-screen preview
 
 - Connected the GitHub repository to `/Users/trevor/Documents/ChatGPT/Studio 2.0` on `codex/continue-studio`. The earlier checkout at `~/happydog-studio` was not modified.

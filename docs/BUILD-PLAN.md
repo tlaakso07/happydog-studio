@@ -1,5 +1,9 @@
 # Studio (Happy Dog) · Build Plan
 
+## Current direction, September 9, 2026
+
+Trevor has selected OpenAI / ChatGPT images and Seedance 2.5 as the front-runners, and real employees plus recurring synthetic cast approved per company. Read [BRAND-WORKFLOW-PLAN.md](BRAND-WORKFLOW-PLAN.md) for the current workflow proposal, brand acceptance gates, provider verification, and implementation exit criteria. It supersedes conflicting provider priorities and timing assumptions below. The earlier provider inventory is historical context, not proof of present API access. The screens are currently sample-data previews; no production generation pipeline exists yet.
+
 ## Context
 
 Trevor has a fully specified product and no code. The spec lives in four audited documents (Master Build Prompt v3, Lockbook System v4, Master Plan v13, 19-board Vision Board) and six 2K reference renders of the final screens (`~/Desktop/Happy Dog UI Concepts/v3-after-audit/`). The product: an enterprise AI ad-content web app where a home-services company's brand is locked into a per-company brand system (five lockbooks plus a Voice and Proof book), and every ad an owner asks for compiles through that system: approve the words, approve the scenes, render once, machine QA, owner approves in a queue.
@@ -115,17 +119,17 @@ Flow: resolve route → idempotency key (`sha256(workspace + capability + canoni
 
 Adapter contract (`providers/types.ts`): `enabled()`, `supports: Partial<Record<Capability, ModelSpec>>`, `submit()`, `poll()`, optional `upload()`. Adapters: `higgsfield.ts` (`@higgsfield/client`, `Authorization: Key ID:SECRET`, handles the preset-recommendation response with `declined_preset_id`, only image URLs as references), `gemini.ts` (Nano Banana Pro), `kie.ts` (ported from ad-platform `lib/providers.ts`), `openai.ts` (GPT Image 2 high fidelity, Whisper), `elevenlabs.ts` (voice design + TTS with timestamps), `fashn.ts`, `heygen.ts`, `modelark.ts` and `fal.ts` (Seedance 2.5), `anthropic.ts` (vision QA), `deepgram.ts`, `local.ts` (whisper-cli), `mock.ts`. Synchronous providers implement submit-then-instant-done under the same contract.
 
-Routing table (`routes.ts`), primary then fallbacks, skipping disabled adapters; agency override per workspace in `workspaces.settings.routing`:
+Preferred routing direction as of September 9. Validate each adapter against the selected account before activation. Secondary providers stay disabled until an explicit requirement justifies them; no silent provider substitution:
 
 | capability | primary | fallbacks |
 |---|---|---|
-| video.first_last_frame | modelark seedance-2.5 | fal seedance-2.5, higgsfield veo3.1/first-last-frame, veo3.1 fast |
-| video.reference_pool | modelark seedance-2.5 | fal, higgsfield veo3.1/reference-to-video |
-| video.image_to_video | higgsfield seedance v1 pro fast | higgsfield kling 2.5 turbo |
-| image.keyframe | gemini nano-banana-pro | kie nano-banana-pro, higgsfield flux kontext, popcorn |
-| image.edit_high_fidelity | gemini nano-banana-pro | openai gpt-image-2, kie |
-| image.character | higgsfield soul/character | soul/standard, gemini |
-| tryon | fashn v1.6 | gemini edit pass (flag `tryon_fallback_to_edit`, lower fidelity, recorded) |
+| video.first_last_frame | Seedance 2.5, verified BytePlus account route | real footage or designed composition when exactness cannot be met |
+| video.reference_pool | Seedance 2.5, verified BytePlus account route | other routes only after agency approval and capability checks |
+| video.image_to_video | Seedance 2.5 from checked stills | real footage or designed composition |
+| image.keyframe | OpenAI GPT Image, Sunburst candidate for final work | Flare candidate for explicit drafts; other providers disabled initially |
+| image.edit_high_fidelity | OpenAI GPT Image using approved references | original pixels or stable composition where precision requires it |
+| image.character | OpenAI GPT Image for synthetic references; verified employee sources for real cast | approve and version the reference package before use |
+| tryon | OpenAI reference editing candidate, subject to garment and mark acceptance | dedicated try-on provider only if the pilot establishes a need |
 | voice.design, tts.locked_voice | elevenlabs | none |
 | avatar.talking | heygen | none (flag `avatar_fallback_to_broll`: to-camera scenes become voice-over B-roll with a warning) |
 | vision.qa | anthropic sonnet | anthropic opus |
