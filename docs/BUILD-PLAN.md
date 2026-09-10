@@ -1,0 +1,208 @@
+# Studio (Happy Dog) · Build Plan
+
+## Context
+
+Trevor has a fully specified product and no code. The spec lives in four audited documents (Master Build Prompt v3, Lockbook System v4, Master Plan v13, 19-board Vision Board) and six 2K reference renders of the final screens (`~/Desktop/Happy Dog UI Concepts/v3-after-audit/`). The product: an enterprise AI ad-content web app where a home-services company's brand is locked into a per-company brand system (five lockbooks plus a Voice and Proof book), and every ad an owner asks for compiles through that system: approve the words, approve the scenes, render once, machine QA, owner approves in a queue.
+
+Decisions taken in this planning session (Trevor, 2026-09-04):
+
+- Build the whole P1 vertical slice now, not P0 scripts first. The first real run is Ryan's company, "Happy Dog" (HappyDog Media Group, Houston), as the first workspace. Ryan is the OWNER: he logs in, uploads the kit through an intake flow, and approves. Trevor is the agency. P0 tests A to D run inside the app, agency-side, on Ryan's kit.
+- Generation credits: use existing Higgsfield credits (Ultra plan, ~437 in the app today). Trevor will create Higgsfield Cloud API keys. Other provider keys are TBD; everything must run on a mock provider without them.
+- Infra: new Supabase project, new Vercel project, new private GitHub repo. Code lives at `/Users/trevor/happydog-studio` (the Desktop folder name contains colons that break pnpm bin resolution; it stays for notes and `.remember/`).
+- Prior art at `~/ad-platform` (Aug 2026 attempt at this product, Zuops-shaped, paused Supabase) is harvested for pieces, not continued.
+- Primary surface is the web app on a work laptop at 1440 wide. Mobile is a responsive bonus.
+
+Provider reality verified 2026-09-04: the Higgsfield Cloud API (`https://api.higgsfield.ai`, header `Authorization: Key ID:SECRET`, TS SDK `@higgsfield/client`) exposes Seedance v1 lite and pro fast (image-to-video 2 to 12s), Veo 3.1 (first-and-last frame, reference-to-video, 4/6/8s), Kling 2.1 and 2.5 turbo, Flux Kontext, Soul character, Popcorn, DOP. It does NOT expose Seedance 2.5, Nano Banana Pro, GPT Image 2, TTS, or virtual try-on. Those run through other providers behind the gateway (BytePlus ModelArk or fal for Seedance 2.5, Gemini API or kie.ai for Nano Banana Pro, ElevenLabs for voices, FASHN for try-on) when keys exist, and on the mock provider until then.
+
+Hard rules carried from the spec: zero em dashes anywhere (copy, comments, commits, docs); real vendor logos only, no emoji in UI; owners never see credits, tokens, or model jargon (Checked, Being redone, Opening / Why it matters / Proof / The deal); retakes never count against the allowance; owner free text is data never instruction; product camera law (product, wrap, or lettering on screen means locked camera, real clip, or vector card); every render carries lineage and cost.
+
+## 1. Repo and scaffold
+
+Location `/Users/trevor/happydog-studio`, pnpm workspaces, Node 22. House conventions carried from `~/ad-platform`: Next 16 App Router with `proxy.ts` (not middleware.ts), Tailwind v4 via `postcss.config.mjs`, flat `eslint.config.mjs`, `@/*` alias, `AGENTS.md` as the rules file with `CLAUDE.md` containing only `@AGENTS.md` and `@HANDOFF.md`, `HANDOFF.md` as the live state ledger updated every session, zod on every API boundary, `@supabase/ssr` for auth.
+
+```
+happydog-studio/
+  AGENTS.md CLAUDE.md HANDOFF.md NOTES.md .nvmrc .env.example
+  package.json pnpm-workspace.yaml
+  supabase/            config.toml, migrations/, seed.sql
+  apps/web/            Next.js (Vercel, root dir apps/web)
+  apps/worker/         long-running Node, pg-boss consumer (Railway)
+  packages/db/         generated Database types + zod schemas for jsonb columns
+  packages/gateway/    generate() -> job, provider adapters, cost + lineage
+  packages/engine/     Script Engine stages, routing, prompt compiler
+  packages/media/      ffmpeg, sharp/resvg compositing, music bed (ported from ad-platform)
+  packages/qa/         gear, logo, color, sync, voice, motion, watch, delivery checks
+  packages/remotion/   BrandedAd composition, three ratios
+  tools/py/            forced_align.py, speaker_embed.py (venv, subprocess only)
+  scripts/             seed-users.ts, invite.ts, rls-check.ts
+```
+
+Scaffold commands (once, in order): `git init -b main`; `pnpm-workspace.yaml` with `apps/*` and `packages/*`; `pnpm create next-app@latest apps/web --ts --tailwind --eslint --app --no-src-dir --import-alias "@/*" --use-pnpm --turbopack --no-git`; `pnpm dlx shadcn@latest init -d --base radix` then add button badge input textarea dialog sheet dropdown-menu tabs tooltip progress avatar separator skeleton command sonner; `pnpm add @supabase/ssr @supabase/supabase-js zod`; `supabase init`, `supabase link --project-ref <new>`, `supabase db push`, `supabase gen types typescript --linked > packages/db/src/database.ts`; `gh repo create happydog-studio --private --source=. --remote=origin`; `vercel link` with Root Directory `apps/web`. Fonts via `next/font/google` (Archivo, Instrument Sans, Spline Sans Mono) as `--font-display`, `--font-ui`, `--font-mono`. Copy the 22 official vendor marks from the earlier session scratchpad `logos/` dir into `apps/web/public/logos/` before that scratchpad is garbage-collected.
+
+Harvest from `~/ad-platform` (copy and adapt): `lib/supabase/{client,server}.ts` (correct SSR cookie pattern), `proxy.ts` (extend public allowlist to `/login`, `/auth/callback`, `/invite`), `components/shell/{sidebar,topbar,command-menu}.tsx` + `nav.ts` (data-driven nav, restyled to Elevated Studio, role-aware, allowance card replaces the credits meter), `lib/brand.ts` as `lib/product.ts` (single wordmark source, still "Studio"), the atomic security-definer RPC style from `0001_init.sql`, the `handle_new_user` trigger idea from `0003_invites.sql`, and the AGENTS.md hard-rules block. Leave behind: all credits tables and RPCs, `user_id = auth.uid()` RLS, password signup and invite codes, the Base UI shadcn build, tesseract OCR in Vercel functions, kie.ai wiring, konva canvas, drive import, community and playbook migrations, the client-specific `.renders/` ffmpeg scripts (their lessons move into the pipeline plan). Check the Vercel team quirk: ad-platform commits had to be authored as `tlaakso11@gmail.com` to deploy; set repo-local `git config user.email` to match before the first push.
+
+## 2. Postgres schema (supabase/migrations)
+
+Every tenant table: `workspace_id uuid not null references workspaces on delete cascade`, RLS `using (is_member(workspace_id))`, writes narrowed with `member_role(workspace_id)`. Worker and gateway use the service role and set `workspace_id` explicitly.
+
+- **0001_tenancy**: enum `member_role (owner|agency|enterprise)`; `orgs`, `enterprise_accounts`, `workspaces(slug, name, monthly_allowance int default 30, allowance_resets_on, disclosure_toggle)`, `profiles`, `workspace_members(pk workspace_id,user_id, role)`, `workspace_invites(email citext, role, accepted_at)`; functions `is_member(uuid)` and `member_role(uuid)` (sql, stable, security definer); trigger `handle_new_user` creates the profile and attaches pending invites by email.
+- **0002_brand_system**: enums `brand_book (cast|wardrobe|product|fleet|world|voice_proof)`, `brand_status (draft|in_review|locked)`, `kit_kind`; `brand_systems(version, status, locked_at, locked_by, signed_off_by)` unique (workspace_id, version), trigger makes locked rows immutable; `intake_sessions(started_at, completed_at, step_reached)` (Test D reads the delta); `kit_assets(kind, bucket, path, mime, bytes, transcript, meta)`; `brand_entities(brand_system_id, book, kind, name, locked_paragraph, data jsonb, sort)` with zod shapes in `packages/db/src/brand.ts`; `voices(cast_entity_id unique, provider, provider_voice_id, description, locked)`; `brand_traits(entity_id, key, value, source_kit_asset_id, source_locator, source_note)` as the provenance pattern (no trait without a source).
+- **0003_offers_library**: `offers(title, terms, starts_on, ends_on, approved_claims text[], status)` with one active offer per workspace (partial unique index); `reference_items(kind saved_ad|winner|footage|playbook)`; `footage_clips(kit_asset_id, t_in, t_out, thumb_path, transcript, tags)`.
+- **0004_jobs**: enums `job_kind (ad|test_a|test_b|test_c)`, `job_status` (briefed, scripting, script_ready, script_approved, storyboarding, scenes_ready, scenes_approved, rendering, checking, ready_for_approval, approved, redo_requested, skipped, failed, cancelled), `render_status`, `scene_route (generate|locked_camera|real_clip|vector_card)`, `approval_decision`, `redo_reason` (seven chips), `qa_verdict`. Tables `jobs(kind, status, brand_system_id not null, offer_id, brief jsonb raw, engine_choice, settings, estimate_cents, counts_against_allowance bool, parent_job_id, redo_reasons, redo_note)`, `scripts(draft_index, lines jsonb [{role opening|why|proof|deal, text, t_start, t_end}], scores, is_winner)`, `scenes(idx, line_ref, who, shows, camera, route, footage_clip_id, negative, manifest, approved_at)` with CHECK `not (manifest->>'showsBrandMark'='true' and route='generate')` (the product camera law in the database), `renders(scene_id null = final, status, kind, path, poster_path, lineage jsonb, qa jsonb, retake_of)`, `approval_events` insert-only (actor, decision, reasons, note, brand_system_version, device), `cost_ledger` (agency select only, service-role insert), `model_prices` (agency-edited, no model names in enums). View `allowance_usage` counts only `kind='ad' and counts_against_allowance`. RPCs (security definer): `create_job` (pins the locked brand system, raises `brand_not_locked`), `approve_script`, `approve_scenes`, `record_approval` (writes the event, moves status, on redo creates the child job with `counts_against_allowance=false` and marks the render superseded). Trigger `jobs_notify` does `pg_notify('job_status', ...)`.
+- **0005_meta_schema_only**: `meta_connections`, `published_ads`, `performance_snapshots`, `feed_posts(enterprise_account_id)`. Tables and RLS only.
+- **0006_storage**: private buckets `kit`, `renders`, `footage`; path law: first folder is the workspace id; select via `is_member((storage.foldername(name))[1]::uuid)`; owners and agency insert to kit and footage; renders is service-role write only. Playback via signed URLs from server components.
+- **0007_realtime**: add `jobs` and `renders` to `supabase_realtime`.
+- pg-boss needs the direct connection or the session-mode pooler (port 5432), never transaction mode.
+
+## 3. Auth and roles
+
+Magic link only. `/login` server action calls `signInWithOtp` with `emailRedirectTo` to `/auth/callback`, which runs `exchangeCodeForSession`. `proxy.ts` refreshes the session and redirects unauthenticated users. Root `/` routes: one owner membership to `/w/[slug]`, agency to `/hq`, none to `/no-access` ("Your invite hasn't arrived yet. Ask your agency."). `lib/auth.ts` exposes `requireMembership(slug, roles?)`; `app/w/[slug]/layout.tsx` loads workspace and role once. RLS is the real boundary. Inviting Ryan: `/hq` "Onboard a company" creates the workspace, "Invite owner" inserts `workspace_invites` and calls `auth.admin.inviteUserByEmail` from a server action using the service role; the trigger attaches membership on first sign-in. Configure real SMTP (Resend or Postmark) in Supabase Auth before inviting Ryan; the default sender is rate-limited to a few emails per hour.
+
+## 4. Route map (apps/web/app)
+
+Shell for `/w/[slug]`: `components/shell/sidebar.tsx` (232px; Home, Calendar; CREATE New ad; BRAND Brand room; LIBRARY Library, Renders, Approvals with badge, Insights; COMMUNITY Chat, Feed; allowance card "October ads 18 / 30 · Resets Nov 1 · managed by [org]"), `topbar.tsx` (56px), `workspace-switcher.tsx` (agency and enterprise only).
+
+| Route | Screen | Reference render | P1 |
+|---|---|---|---|
+| `/w/[slug]` | Studio Home: one state card ("12 ads are ready for you" / "Tell us this month's deal" / "Nothing to do"), Composer with hold-to-talk, OfferCard, RecentRenders with Checked chips | 02 | build |
+| `/w/[slug]/create` | Create from this month's deal: stepper, StartPath, OfferAttached, BriefEditor (guided or full prompt, voice note), AdvancedEngine collapsed with real logos, RatioDuration, EstimateLine ("About $6 · uses 1 of 12 remaining"), PhonePreview | 03 | build |
+| `/w/[slug]/jobs/[jobId]/script` | Script Studio: Free-to-redo banner, four blocks Opening / Why it matters / Proof / The deal, Checked-before-you-saw-it panel, Other drafts sheet, "Hear [cast] read it" | 04 | build |
+| `/w/[slug]/jobs/[jobId]/scenes` | Storyboard: timeline ruler, scene cards with WHO / SPEAKS / SHOWS / CAMERA and a route badge, House rules, "Approve scenes, render once" | 05 | build |
+| `/w/[slug]/approvals` | Approval Queue (section 6) | 01 | build |
+| `/w/[slug]/renders` | Renders grid; `?render=id` opens RenderInspector sheet; agency sees LineageRail, QaDetail, CostBreakdown, RetakeStrip | Library board | build |
+| `/w/[slug]/brand` | Brand Room: locked banner, five vault cards + Voice and proof, ProvenancePanel; agency gets EditEntitySheet and LockVersionDialog | 06 | build |
+| `/w/[slug]/brand/intake` | Kit intake wizard (section 5) | none | build |
+| `/w/[slug]/library` | Footage tab live; Saved, Winners, Playbooks tabs are honest empty states | RefLibrary board | crude |
+| `/w/[slug]/calendar`, `/insights`, `/chat`, `/feed` | one EmptyState each with a plain sentence about when it arrives | boards | stub |
+| `/hq` | Agency HQ: stat row, five-row CompanyTable, IsolationFooter, OnboardCompanyDialog, InviteOwnerDialog | AgencyHQ board | build |
+| `/hq/ledger` | Cost ledger table, filters, totals, CSV | none | build |
+| `/hq/tests` | P0 tests A to D per workspace, run buttons, cost per test | none | build |
+| `/login`, `/auth/callback`, `/no-access` | auth | | build |
+
+Owner status words live in one file, `apps/web/lib/plain.ts`: passed = Checked, review or redo_requested = Being redone, generating or checking = In the studio, approved = Approved. Owner components import only from there.
+
+## 5. Intake flow
+
+`IntakeWizard` (client) driven by a `steps` array in `apps/web/lib/intake.ts`: 1 Logo (vector only, reject raster with "We need the file your sign shop uses."), 2 Uniforms (shot guide per photo), 3 Products (photos, spec PDFs, product page URL), 4 Trucks and signs (photos plus wrap art), 5 Job sites (photos and short video to the footage bucket), 6 Voice notes (MediaRecorder with three on-screen prompts), 7 This month's deal (creates the `offers` row), 8 Done ("Your brand room opens in about three days."). Creates an `intake_sessions` row on start, uploads browser-direct to `kit/{workspace}/{session}/{kind}/{file}` (resumable for files over 6MB), inserts `kit_assets` per file, saves `step_reached` after each step so Ryan can leave and return. On completion a trigger notifies the worker, which runs the Onboarding agent to draft `brand_entities`, `voices`, and `brand_traits` with a source for every trait. Agency curates in `/w/[slug]/brand`: EditEntitySheet per entity with a provenance picker, LockVersionDialog sets `locked`, Ryan's "Looks right" records `signed_off_by`.
+
+## 6. Approval Queue interaction
+
+Server component loads finals with `renders.status='passed' and scene_id is null` joined to jobs at `ready_for_approval`, oldest first, with winning script lines, offer, and QA verdicts. Layout from `ApprovalQueue.dc.html`: headline "N ads are ready. Every one already checked.", mono progress line (40 seconds per ad), grid 420px + 1fr, VideoWell `#101322` radius 14, WhatItSays rows with OPENING / WHY IT MATTERS / PROOF / THE DEAL, CheckedRow with Gear / Logo / Colors / Product plus the offer-match line, action bar Approve (A) / Redo (R) / Skip for now (S), note "Redos never count against your [Month] ads.", seven reason pills including "Say it my way" with a mic.
+
+Keyboard: one keydown listener on window, ignored when focus is in an input, textarea, or contenteditable. A approves, S skips, R enters redo mode (pills toggleable, Approve disabled, Enter submits with at least one reason, Esc exits, arrows move, Space toggles). After each decision the queue advances; the last card reads "That's everything. [Org] takes it from here." Writes: server action `decide(renderId, decision, reasons, note, device)` calls `rpc('record_approval')` and revalidates. Redo creates the child job inside the RPC with `counts_against_allowance=false`, so the allowance never moves. Reason chips ride as `jobs.redo_reasons` (enum, mapped to fixed rewrite strategies); `redo_note` is data, delimited in prompts.
+
+## 7. Job state machine and Realtime
+
+Transitions live once in `packages/engine/src/job-states.ts` (`TRANSITIONS` map, `advance()` throws on illegal moves). The worker is the only status writer apart from the four RPCs. Path: briefed → scripting → script_ready → (owner) script_approved → storyboarding → scenes_ready → (owner) scenes_approved → rendering → checking → ready_for_approval → (owner) approved | redo_requested | skipped; checking → rendering for a scene-only retake (`renders.retake_of`); any → failed | cancelled. Worker `apps/worker/src/index.ts`: one `pg` client in session mode does `LISTEN job_status` and `LISTEN intake_completed`, enqueues `boss.send('job.<status>', {jobId})` with `singletonKey = jobId`; a 30-second sweep re-enqueues stalled jobs. UI hook `apps/web/hooks/use-live-row.ts` subscribes to `postgres_changes` on `jobs` and `renders` and calls `router.refresh()`; server components stay the source of truth.
+
+## 8. Cost ledger and lineage
+
+Gateway writes one `cost_ledger` row per call and returns `lineage` per render. `estimate()` sums `model_prices` for the default route; owners see a rounded dollar ("About $6"), agency sees cents. RenderInspector shows everyone the player, Checked chips, and a plain lineage line ("Made with Seedance 2.5 · Brand system v2"); agency also sees LineageRail with real logos, QaDetail with bounding boxes over the poster, CostBreakdown per render and per job including retakes, and redo chain links. `/hq/ledger` groups by workspace and month with CSV export. `/hq/tests` shows tests A to D per workspace with job links and cost totals; D reads `intake_sessions`.
+
+## 9. Gateway (`packages/gateway`)
+
+One interface, every AI call goes through it, every call is logged. Polling only, no webhook server (`// ponytail: add webhooks when more than 10 concurrent video jobs make polling cost matter`).
+
+```ts
+type Capability = "video.first_last_frame" | "video.reference_pool" | "video.image_to_video"
+  | "image.keyframe" | "image.edit_high_fidelity" | "image.character" | "tryon"
+  | "tts.locked_voice" | "voice.design" | "avatar.talking" | "vision.qa" | "transcribe";
+generate({ capability, input, workspaceId, jobId, renderId?, purpose, idempotencyKey?, maxCostUsd? }) -> { jobRef, poll() }
+generateAndWait(req, { timeoutMs, intervalMs })
+```
+
+Flow: resolve route → idempotency key (`sha256(workspace + capability + canonical input)`; a hit on a done call returns stored outputs for free, which makes P0 re-runs free) → `reserve_spend()` RPC (race-proof single UPDATE, fails past the workspace month cap or the job cap) → adapter `submit()` → insert `gateway_calls` row → poll; on done, `persistOutput()` streams every provider URL into Supabase Storage `renders/{workspace}/{job}/{callId}-{n}.{ext}` with sha256 and probed dimensions before the row is marked done (Higgsfield keeps outputs 7 days; a provider URL is never the asset of record). Transport retries 3x inside adapters; provider failures fall through to the next fallback once when `retryable`.
+
+Adapter contract (`providers/types.ts`): `enabled()`, `supports: Partial<Record<Capability, ModelSpec>>`, `submit()`, `poll()`, optional `upload()`. Adapters: `higgsfield.ts` (`@higgsfield/client`, `Authorization: Key ID:SECRET`, handles the preset-recommendation response with `declined_preset_id`, only image URLs as references), `gemini.ts` (Nano Banana Pro), `kie.ts` (ported from ad-platform `lib/providers.ts`), `openai.ts` (GPT Image 2 high fidelity, Whisper), `elevenlabs.ts` (voice design + TTS with timestamps), `fashn.ts`, `heygen.ts`, `modelark.ts` and `fal.ts` (Seedance 2.5), `anthropic.ts` (vision QA), `deepgram.ts`, `local.ts` (whisper-cli), `mock.ts`. Synchronous providers implement submit-then-instant-done under the same contract.
+
+Routing table (`routes.ts`), primary then fallbacks, skipping disabled adapters; agency override per workspace in `workspaces.settings.routing`:
+
+| capability | primary | fallbacks |
+|---|---|---|
+| video.first_last_frame | modelark seedance-2.5 | fal seedance-2.5, higgsfield veo3.1/first-last-frame, veo3.1 fast |
+| video.reference_pool | modelark seedance-2.5 | fal, higgsfield veo3.1/reference-to-video |
+| video.image_to_video | higgsfield seedance v1 pro fast | higgsfield kling 2.5 turbo |
+| image.keyframe | gemini nano-banana-pro | kie nano-banana-pro, higgsfield flux kontext, popcorn |
+| image.edit_high_fidelity | gemini nano-banana-pro | openai gpt-image-2, kie |
+| image.character | higgsfield soul/character | soul/standard, gemini |
+| tryon | fashn v1.6 | gemini edit pass (flag `tryon_fallback_to_edit`, lower fidelity, recorded) |
+| voice.design, tts.locked_voice | elevenlabs | none |
+| avatar.talking | heygen | none (flag `avatar_fallback_to_broll`: to-camera scenes become voice-over B-roll with a warning) |
+| vision.qa | anthropic sonnet | anthropic opus |
+| transcribe | local whisper-cli | deepgram, openai whisper-1 |
+
+`GATEWAY_MODE=mock` (default with no keys) serves fixtures; `live` throws `NoProviderError` naming the missing env var, never silently mocks; `GATEWAY_ALLOW_MOCK_FOR=avatar.talking,tryon` permits explicit mixing and every report prints `mockCapabilities`. Cost table in `costs.ts` with a `verified` flag per row; unverified rows get corrected from provider pricing on day one of P0 and from the ledger after the first run. Rough estimate for a 5-scene 20s ad today: about $9.50 including a 10% regen budget.
+
+Ledger tables (add to migration 0004): `gateway_calls(id, workspace_id, job_id, render_id, capability, provider, model, purpose, idempotency_key unique, input_json (storage paths only), provider_ref, status, attempt, fell_back_from, cost_usd_estimate, cost_usd_actual, latency_ms, output_paths[], error, created_at, completed_at)`; `cost_ledger` as in section 2 gains `kind estimate|actual`; RPC `reserve_spend(workspace, job, usd, purpose)`. Job caps: `jobs.spend_cap_usd` defaults to 1.5x the estimate, `jobs.regen_budget_usd` to 10%; a scene may retake at most twice, then it goes to `needs_agency` with the verdict attached, never silently to the owner. `Render.lineage` is assembled from `gateway_calls` rows: per scene the recipe, still call ids, composite inputs, video call, audio call and voice id, QA verdict ids, retakes; plus assembly versions and cost estimate vs actual.
+
+## 10. Engine (`packages/engine`, pure TypeScript + Anthropic SDK)
+
+Zod schemas are the source of truth (`src/schema/*.ts`), emitted as JSON Schema for the app. Claude calls use `messages.parse` with `zodOutputFormat`. Models in one file `models.ts`: writer Opus, judge and mapper and vision Sonnet, watch-it-back Opus.
+
+- **Brief block** (`brief.ts`): all owner free text (typed brief, pasted prompt, voice-note transcript, PDF extract) is serialized inside `<<<BRIEF id sha>>> … <<<END BRIEF sha>>>` fences with the sha repeated so a pasted fake fence fails. One fixed system sentence says the block is customer data, never instruction. The compiler has no access to free text at all.
+- **Stage 1 Words** (`words.ts`): `writeDrafts` (one streamed Opus call, five drafts committed to five fixed angles, claims and proof passed as numbered lists referenced by id) → `hardChecks` in pure code (cadence: mean sentence ≤ 14 words, contractions, no clause stacks; repetition: no adjacent duplicates, no repeated 3-gram, no two lines with Jaccard > 0.5; flow: hook < problem < proof < offer; timing at 140 wpm plus pause budget within the duration minus 1.5s end card; claims: any number, percent, dollar, "free", "warranty", "lifetime", superlative must sit in a line whose approved claim text appears verbatim; banned words plus the em dash character) → `rewriteFailing` once → `judgeDrafts` (humanity, hook, specificity, flow, 0 to 100, plus `claimViolations` which hard-fail regardless of input) → `pickWinner`.
+- **Stage 2 Sync map** (`syncmap.ts`): one Sonnet call fills speaker, on-screen manifest (cast + wardrobe ids, product ids, fleet ids, lettering flag, place, action enum), camera move enum, framing, negatives, optional real clip id, choosing only from enumerated ids. Time windows are allocated by code proportional to estimated line length so the sum equals duration minus end card. `validateSyncMap` (pure): one scene per line, contiguous, every id exists, wardrobe belongs to that cast and has an approved dressed set, max two cast per scene, lettering implies a product or on-screen text; one repair call then `needs_agency`.
+- **Stage 2.5 Routing** (`route.ts`, pure, tested): offer or CTA line → `remotion_card`; product on screen and a tagged real clip exists → `real_clip`; lettering or product macro with no person → `vector_card`; any other product on screen → `product_locked` with camera forced to `locked` (the camera law); two cast → `two_cast_reference_pool`; to-camera → `avatar_to_camera` when an avatar provider is enabled, else `voiceover_broll` with the flag; otherwise `voiceover_broll`. A cast member without a locked voice cannot be cast in a speaking scene (validation error, not a fallback). `qaProfile` is `close` for close or macro framing or `product_locked`, else `wide`. The DB CHECK in section 2 mirrors the law.
+- **Stage 3 Compiler** (`compile.ts`, pure, no LLM, no free-text parameter): concatenates in fixed order world camera language, light, place; each cast member's locked paragraph and wardrobe paragraph verbatim; each product's critical-rule sentence (countable facts); action and camera from fixed enum dictionaries (for example `install_carry_to_empty_opening`: "Two installers carry one complete window unit toward one empty rough opening with no glass and no frame in it."); duration and "mouth does not move" for video targets; the world negative list plus scene negatives. Reference images: 4+ dressed angles per cast, the logo macro, up to 3 SKU angles, the fleet plate. Each segment records `compiledFrom {field, source}` for the agency lineage panel. Unit test: a marker string seeded into the brief never appears in any shot prompt.
+
+## 11. Worker (`apps/worker`)
+
+Node 22, pg-boss on the Supabase session pooler. Runs on Trevor's Mac for P0, then a Railway Docker image with ffmpeg, whisper.cpp, Chrome (Remotion), and a small Python venv (forced alignment, speaker embedding).
+
+Job status vocabulary is the app plan's enum (section 2); the pipeline's per-scene progress lives in `scenes.status (pending|stills|composited|video|sync_ok|gear_ok|failed)`, and `rendering → checking` fires when every scene is `gear_ok`. Side states `paused_budget` and `needs_agency` are added to `job_status`. `transition(jobId, from[], to)` is one conditional UPDATE that throws on zero rows.
+
+Queues and handlers (`src/jobs/*.ts`): `lockbook.cast.build` (Soul turnaround 6 angles → per outfit `tryon` per angle → logo print pass with the real logo art and macro attached as references, instruction "print this exact artwork as embroidered ink, change nothing else" → close-profile gear QA → `voice.design` from the cast voice brief, never from an audio sample → 4-line TTS sample → pending approval), `engine.words`, `engine.syncmap`, `render.stills` (2 candidates per frame, gated before use), `render.composite`, `render.video` (dispatch by recipe: first+last frame, image-to-video with `cameraFixed`, reference pool, avatar, real clip via ffmpeg trim, remotion or vector card with no gateway call; plus TTS for the line; refuses any first frame that has not passed still QA), `qa.sync`, `qa.gear`, `qa.voice`, `assemble.remotion`, `qa.watch`, `footage.ingest` (1080p proxies, scene cut, transcribe, vision tags per segment at 2fps including third-party marks), `p0.run`, `ledger.reconcile`. Concurrency: video 2, stills 4, QA 4, engine 2, assemble 1, with `singletonKey: workspaceId` on video and assemble so one company cannot take every slot. Retakes: every regenerated asset is a `renders` row with `retake_of` and a reason; allowance is touched only at job creation by the app.
+
+Craft rules harvested from `~/ad-platform` (Harley and RBA builds), each with the stage that encodes it and the check that enforces it: garment logos are printed by the model with the real art as a reference (hand compositing reads as a decal) and judged by an ink signature plus letterform match and a room-drift check; keyframes carry the logo before animation and no video job accepts an un-gated still; install beats use an empty rough opening (facts check: exactly one frame in the opening); handheld motion is authored in Remotion and measured (70 to 95 percent of frames moving for handheld, under 5 for locked); audio splices are hard butts with 25ms fades; captions are measured per framing against the face bbox and Reels chrome; per-ratio vertical windows, never center crop, eyes at the upper third; every encode gets `aresample=48000`, `-ar 48000`, `-movflags +faststart`, loudnorm I=-16 TP=-1.5, zero decode errors, no dead air; verification at full resolution across all sampled frames; third-party branding is a per-frame check on real footage; on-screen text equals spoken words verbatim (WER ≤ 0.05, claim lines exact); accurate seek after `-i`, `setsar=1`, re-encode provider HEVC before concat; music laid on the finished cut with a per-ad vocal pocket and bedcheck (crowding within 1 dB, gap fill 7 to 18 dB); balance is checked, not computed. Ported to TypeScript in `packages/media`: normalize, splice, deliver, addmusic and bedcheck, prepVo, the timing algorithm; kept as Python subprocesses: `forced_align.py` (wav2vec2) and `speaker_embed.py` (Resemblyzer); not ported: PIL plate scripts (replaced by Remotion components) and ad-platform `lib/prompt.ts` (it concatenates free text, the exact path the v3 rule forbids).
+
+## 12. Compositing, assembly, QA (`packages/media`, `packages/remotion`, `packages/qa`)
+
+- **Compositing** (sharp + resvg + ffmpeg `perspective`): only for flat rigid camera-locked surfaces (product cutouts, wraps and signs on known geometry, vector cards). `compositeAtSamePlacement(first, last, cutout, placement)` is the still-to-still contract. Luminance match within 5 percent and an optional contact shadow.
+- **Remotion `BrandedAd`**: props carry ratio (1080x1920, 1080x1350, 1080x1080; 16:9 behind `allow_16x9`), brand tokens and fonts, scenes with source (clip with `yWindow`, still, or SVG card), authored handheld drift, optional punch-in, karaoke captions from sync-map word timings (min 5 frames per word, lead 40 ms, band chosen to avoid the face), verbatim pills, VO tracks, end card with claim, qualifier, fine print, logo bug, safe area (265px bottom on 9:16). Rendered locally three times per job with `@remotion/renderer` (`// ponytail: Lambda when one Mac cannot keep up`). ffmpeg then delivers and lays the music bed.
+- **QA verdict JSON** per render: `status pass|warning|error`, `checks[]` each with `id`, `method (code|vision|both)`, per-frame `bbox` normalized xywh in the 9:16 master, `value`, `threshold`, `suggestedFix`, plus `modelCalls` and `costUsd`. Thresholds live in `thresholds.ts` (word slack 250 ms, line WER 0.05, garment delta-E pass 12 warn 20, logo ink luma 120 to 180, edge IoU 0.85, voice cosine 0.75, LUFS -17 to -15, regen 10 percent, max 2 retakes per scene).
+- **Profiles**: `wide` runs silhouette, garment color (sharp Lab delta-E inside a vision-located bbox, never a vision color verdict), competitor marks, motion; logo and facts are recorded as `skipped: wide profile` so an honest wide shot is never failed on 30px embroidery. `close` adds logo match (letterforms against the official file at full-res crop plus ink signature), countable facts, product geometry (edge IoU first vs mid vs last), room drift. Every profile screens competitor and third-party marks. Stills run the same checks before becoming first or last frames.
+- **Sync**: transcribe, forced-align per line, snap to RMS onsets, all words inside the window ± 250 ms, claim lines exact; failure re-renders only that scene's audio or avatar clip. **Voice continuity**: lineage assertion (same voice id on every speaking scene) plus speaker-embedding cosine ≥ 0.75; degrades to lineage-only and says so if the venv is missing. **Watch-it-back**: one Opus call over contact sheets, cut-boundary frame pairs, transcript, and the sync map, returning timestamped issues (continuity, teleport, dead frame, lip flap, caption on face, prop contradiction, reads as AI, pacing); a single-scene error triggers the surgical repair ladder: caption fix, audio reroll, still edit and re-interpolate, then a scene retake, never the whole ad.
+
+## 13. P0 tests A to D as worker jobs
+
+`pnpm p0:run --workspace happy-dog --test A|B|C|D [--run-id X] [--auto-approve] [--note "…"] [--blind-result spotted|not_spotted]`. The run id seeds idempotency, so a re-run is free and a new id regenerates. Tests exercise production handlers, not separate scripts.
+
+- **A · Cast in gear + voice**: one cast member, 3 outfits, 6 angles (18 dressed stills through try-on, logo pass, close QA), voice design, 4 approved lines as TTS, 10 clips of 4s (5 first+last-frame turns, 3 handheld holds, 2 avatar lines), gear QA per clip, voice check across all pairs. Pass: clips hold ≥ 8 of 10, voice same person 10 of 10 (all pairwise cosine ≥ 0.75), stills 18 of 18 after at most one logo retry each.
+- **B · Product under motion**: one SKU cutout on an identical first and last plate, 10 locked clips of 4s, then a slow push and a lateral track, with geometry and facts checks and a vision zoom on grilles and glass at three timestamps. Pass: locked ≥ 8 of 10. Motion has no pass rule; its edge IoU series and facts per frame are the recorded evidence behind the camera law and decide whether `slow_push` becomes a per-workspace flag.
+- **C · One assembled ad**: a full job through words, owner gate, sync map, owner gate, all scenes, QA, assembly in three ratios with music, watch-it-back. The CLI prompts at each gate and sums human time. Pass: human time under 3 hours, spend under $40 (estimate, then actual once reconciled), watch-it-back clean with zero errors, delivery spec passes, three ratios present, blind 5-second phone test recorded as not spotted.
+- **D · Kit collection**: no generation; reads `intake_sessions` and kit events per workspace for days to first complete kit and days to fifth across the enterprise, plus per-item delays. Numbers only.
+- **Report**: `p0/{workspace}/{test}/{runId}/ledger.csv` (every gateway call with estimate, actual, latency, fallbacks) and `report.json` + `report.md` (pass table, contact sheet per clip, every warning and error with bbox thumbnails, spend by capability, retake spend, providers used, and `mockCapabilities` so a run with missing keys cannot pass as real).
+
+## 14. Verification
+
+- `supabase db reset` runs migrations plus `seed.sql` clean before every milestone demo. Seed: org Studio (Trevor agency on all), enterprise account Happy Dog Group, workspaces `northline-windows` (fixture: locked brand system v2 with four cast members and voices, three outfits, two SKUs with countable facts, fleet wrap, world rules, Voice and Proof entries, every trait with provenance; active October offer; jobs at `script_ready`, `scenes_ready`, and three at `ready_for_approval` with fixture mp4s) and `happy-dog` (empty, Ryan invited). Users: Trevor, `dana@northline.test` owner, Ryan owner via invite.
+- `scripts/rls-check.ts` (vitest): as Dana and as Ryan, jobs return only own-workspace rows, `cost_ledger` returns zero rows for owners, cross-workspace insert into `offers` fails, storage list on the other workspace prefix fails.
+- Playwright `apps/web/e2e/` at 1440x900 as Dana: `deal.spec` (change offer), `words.spec` (edit a line, approve, status `script_approved`), `scenes.spec` (approve scenes, estimate shows dollars never credits), `approve.spec` (A decrements and writes an `approval_events` row; R + "Wrong price" + Enter creates a child job with `counts_against_allowance=false` and the allowance text is unchanged; S skips), `copy.spec` (crawl every owner route: no em dash, no "credit", "token", "QA PASSED", "RETAKE").
+- Worker: `job-states.test.ts` illegal transitions throw; `compile.test.ts` brief marker never reaches a prompt; `route.test.ts` table cases; `media.test.ts` normalize asserts 48k, faststart, setsar via ffprobe; `qa` fixture frames with known delta-E and IoU produce the expected verdicts; `GATEWAY_MODE=mock pnpm p0:run --test C --auto-approve` produces three deliverables passing `delivery.ts` with zero keys.
+- Live: `pnpm doctor` confirms ffmpeg, whisper-cli, Chrome, Python venv, and which providers are enabled; P0 A then B then C on Ryan's kit with ledgers; `costs.ts` verified flags corrected from real numbers.
+
+## 15. Build sequence and milestones
+
+Each milestone ends with a HANDOFF.md entry and a Vercel preview.
+
+- **M0 Scaffold, tenancy, auth**: repo at `~/happydog-studio`, Supabase project created ($0/month on the Laakso Labs org, confirmed), migrations 0001 and 0006, `proxy.ts`, login, callback, shell, `/hq` with two workspaces, invite flow, real SMTP configured. Demo: Trevor magic-links into HQ; Ryan's invite lands in an empty Happy Dog home with honest empty states.
+- **M1 Brand data, intake, Brand Room**: 0002, wizard, owner read view, agency edit and lock, provenance panel, Northline v2 seed. Demo: Ryan uploads the kit; Trevor sees drafts with sources and locks v1; Test D timer runs.
+- **M2 Media, gateway, worker skeleton, offers, jobs, Realtime**: 0003, 0004, 0007, `packages/media`, `packages/gateway` with mock, `create_job`, worker LISTEN plus pg-boss, `use-live-row`. Demo: Create from the deal; status ticks live on Home on mock.
+- **M3 Engine, Script Studio, Storyboard**: words, sync map, routing, compiler, `approve_script`, `approve_scenes`, route badges, camera-law CHECK. Demo: approve words, approve scenes.
+- **M4 QA, Remotion, Approval Queue, ledger**: `packages/qa`, `BrandedAd`, live adapters as keys arrive (Higgsfield and Anthropic first), `record_approval`, keyboard and reason chips, allowance view. Demo: A/R/S on three fixture ads; allowance untouched by redo.
+- **M5 Renders grid, agency inspector, HQ ledger, P0 tests A to C** in-app on Ryan's kit. Demo: lineage rail and cost per test, pass tables.
+- **M6 Footage path** (upload, transcribe, scene cut, tag; `real_clip` routing picks clips).
+- **M7 Playwright suite, visual pass against the six renders, production deploy, worker on Railway.**
+
+## 16. Environment and accounts
+
+Web (Vercel): `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY` (invite action only), `NEXT_PUBLIC_APP_URL`. Worker (`apps/worker/.env.local`, zod-validated in `env.ts`): `DATABASE_URL` (session pooler 5432), `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `GATEWAY_MODE`, `GATEWAY_ALLOW_MOCK_FOR`, `GATEWAY_FLAGS`, `MOCK_SCENARIO`, `ANTHROPIC_API_KEY`, `HIGGSFIELD_API_KEY` + `HIGGSFIELD_API_SECRET`, `GEMINI_API_KEY` or `KIE_API_KEY`, `OPENAI_API_KEY`, `ELEVENLABS_API_KEY`, `FASHN_API_KEY`, `HEYGEN_API_KEY`, `MODELARK_API_KEY` or `FAL_KEY`, `DEEPGRAM_API_KEY`, `WHISPER_CLI`, `WHISPER_MODEL`, `PY_VENV`, `WORKER_VIDEO_CONCURRENCY`, `REMOTION_CHROME_PATH`, `WORKSPACE_DEFAULT_SPEND_CAP_USD`. What runs with zero keys: the whole state machine, compositing, Remotion in three ratios, ffmpeg delivery and music, all code QA, reports and ledgers. First two keys to add: Higgsfield Cloud (Test B end to end, Test A visuals) and Anthropic (real scripts and verdicts). Accounts: new Supabase project (Pro tier when kit uploads exceed the free 50MB file cap), new Vercel project with root `apps/web`, private GitHub repo `happydog-studio`, Railway for the worker, Higgsfield Cloud, Anthropic, and the optional providers above; Resend or Postmark SMTP for Supabase Auth before Ryan is invited.
+
+## 17. Open items Trevor owns
+
+- Create Higgsfield Cloud API credentials at cloud.higgsfield.ai (separate wallet from the Ultra app credits).
+- Decide which optional keys to buy first: ElevenLabs (voices are a blocker for any speaking scene), FASHN (try-on), Gemini or kie.ai (keyframes at Nano Banana Pro quality), BytePlus ModelArk (Seedance 2.5, otherwise Veo 3.1 through Higgsfield is the first+last-frame primary).
+- Product name before Ryan logs in; the wordmark stays "Studio" in one file until then.
+- Ryan's email for the invite, and the day the minimum kit link goes to all five companies (Test D clock).
+
+Skipped on purpose, with the condition that brings each back: webhooks (more than 10 concurrent video jobs), Remotion Lambda (one Mac cannot keep up), CLIP or YOLO detectors (Claude vision plus sharp pixels prove insufficient), per-workspace concurrency table (fairness across five companies becomes visible), column-level hiding of QA detail from owners (a second agency signs), Meta publishing, chat, feed, calendar, insights beyond empty states (P2 and P3 gates).

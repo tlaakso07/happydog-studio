@@ -30,7 +30,7 @@ Read these two, in order. They are the whole briefing.
 
 `CLAUDE.md` pulls both into context automatically, so a Claude Code session in this directory already has them. Read `HANDOFF.md` yourself before starting anything, because it is where the last session said what it left undone.
 
-The full product design is the plan referenced at the top of `AGENTS.md`. It is 17 sections and it lives outside the repo. Ask Trevor for it before designing anything new. You do not need it to work on a screen that already has a reference render.
+The full product design is `docs/BUILD-PLAN.md`, 17 sections. Section 4 is the route map, which says what every screen is and which render it matches. You do not need the whole thing to work on a screen that already has a render.
 
 ## What exists right now
 
@@ -74,7 +74,16 @@ All three pass on main. Keep it that way. If your change has non-trivial logic, 
 
 ## Design work
 
-Every screen in the P1 set has an approved 2K render. Ask Trevor for the render before building a screen. Building one from the written description alone will not match, and the renders are the thing the client signed off on.
+Every screen in the P1 set has an approved 2K render in `design/reference/`. Open the render before building the screen. Building from the written description alone will not match, and the renders are what was signed off on.
+
+| Render | Screen | Route |
+|---|---|---|
+| `01-approval-queue.png` | Approval Queue | `/w/[slug]/approvals` |
+| `02-studio-home.png` | Studio Home, built | `/w/[slug]` |
+| `03-create-from-deal.png` | Create from this month's deal | `/w/[slug]/create` |
+| `04-script-studio.png` | Script Studio | `/w/[slug]/jobs/[jobId]/script` |
+| `05-storyboard.png` | Storyboard | `/w/[slug]/jobs/[jobId]/scenes` |
+| `06-brand-room.png` | Brand Room | `/w/[slug]/brand` |
 
 Match the reference render over the written plan when they disagree, and say in your handoff entry that you did.
 
@@ -87,7 +96,6 @@ Match the reference render over the written plan when they disagree, and say in 
 
 ## What to ask Trevor for
 
-- The reference render for the screen you are building.
-- The 17-section build plan, if you are designing something that has no render.
+- A reference render, if you are asked for a screen that has none in `design/reference/`.
 - Supabase or Vercel access, only once you are working on something that genuinely needs it.
 - The product name. The wordmark is still the placeholder "Studio".

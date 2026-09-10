@@ -1,6 +1,6 @@
 # Studio (codename Happy Dog)
 
-Enterprise AI ad-content platform for home-services companies. An agency locks a company's brand into a per-company brand system (five lockbooks plus a Voice and Proof book). The owner states a monthly deal, approves the words, approves the scenes, the system renders once, machine QA checks it, and the owner approves the finished ad in a queue. Read HANDOFF.md for the live state and the plan at `~/.claude/plans/now-take-those-referance-iridescent-popcorn.md` for the full design.
+Enterprise AI ad-content platform for home-services companies. An agency locks a company's brand into a per-company brand system (five lockbooks plus a Voice and Proof book). The owner states a monthly deal, approves the words, approves the scenes, the system renders once, machine QA checks it, and the owner approves the finished ad in a queue. Read HANDOFF.md for the live state and `docs/BUILD-PLAN.md` for the full design.
 
 ## Hard rules
 
@@ -18,6 +18,6 @@ Enterprise AI ad-content platform for home-services companies. An agency locks a
 
 - pnpm workspaces, Node 22. `apps/web` Next.js App Router (Vercel, root directory `apps/web`), Tailwind v4 via `postcss.config.mjs`, shadcn (radix), `@supabase/ssr`. `apps/worker` long-running Node with pg-boss on the Supabase session pooler (port 5432). `packages/{db,gateway,engine,media,qa,remotion}`.
 - `proxy.ts` not `middleware.ts`. Zod at every API boundary. Migrations in `supabase/migrations`, applied with the Supabase MCP or CLI, never by hand in the dashboard.
-- Design system "Elevated Studio": paper `#F6F7F9`, surface `#FFFFFF`, ink `#16181D`, secondary `#4C5262`, meta `#6B7284`, lines `#E5E7EE`, accent cobalt `#2447F5` with wash `#EDF1FE`, dark ground `#101322` for video wells only. Fonts Archivo (display), Instrument Sans (UI), Spline Sans Mono (data, tabular numerals). 8pt grid, 10 to 12px radius, 40 to 44px controls. Reference renders: `~/Desktop/Happy Dog UI Concepts/v3-after-audit/`.
+- Design system "Elevated Studio": paper `#F6F7F9`, surface `#FFFFFF`, ink `#16181D`, secondary `#4C5262`, meta `#6B7284`, lines `#E5E7EE`, accent cobalt `#2447F5` with wash `#EDF1FE`, dark ground `#101322` for video wells only. Fonts Archivo (display), Instrument Sans (UI), Spline Sans Mono (data, tabular numerals). 8pt grid, 10 to 12px radius, 40 to 44px controls. Reference renders: `design/reference/`.
 - Video delivery: every ffmpeg encode uses `aresample=48000`, `-ar 48000`, `-movflags +faststart`, loudnorm I=-16 TP=-1.5. Verify at full resolution across all sampled frames.
 - Update HANDOFF.md at the end of every working session. Newest work at the top.

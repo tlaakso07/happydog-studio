@@ -2,6 +2,15 @@
 
 Live state ledger. Newest at the top. Read AGENTS.md first.
 
+## 2026-09-09 · Repo opened up for a second developer
+
+- Private repo live at github.com/tlaakso07/happydog-studio, default branch `main`. Only `.env.example` is tracked, no secrets.
+- `ONBOARDING.md` is the entry point for anyone new, human or agent: setup, the rules that get work rejected, what is deliberately not built, and the working agreement.
+- `README.md` points at it. `CLAUDE.md` still auto-loads `AGENTS.md` and `HANDOFF.md`, so a Claude Code session in this directory is briefed on open.
+- The six approved renders moved into `design/reference/` and the plan into `docs/BUILD-PLAN.md`. `AGENTS.md` now points at both in-repo instead of at paths under Trevor's home directory, so the repo is self-contained.
+- Working agreement: branch off main, open a pull request, add a HANDOFF entry in the same pull request. Not enforced by branch protection yet.
+- Still open: Ryan's GitHub username, so he can be added as a collaborator.
+
 ## 2026-09-09 · Studio Home built
 
 - `/w/[slug]` Studio Home is built against reference render 02: state card, offer bar, Fresh out of the studio grid, 232px rail with the allowance card. Verified at 1440, 1024 and 390.
