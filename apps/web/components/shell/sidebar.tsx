@@ -3,17 +3,21 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ChevronDown } from "lucide-react";
+import type { ReactNode } from "react";
 import { navItems } from "@/lib/nav";
 import { Wordmark } from "@/components/shell/wordmark";
 import { AllowanceCard } from "@/components/shell/allowance-card";
 import type { Allowance, Viewer, Workspace } from "@/lib/studio-home";
+import { useOptionalStudioPreview } from "@/components/studio/preview-provider";
 
 type SidebarProps = {
   workspace: Workspace;
   viewer: Viewer;
-  allowance: Allowance;
+  allowance: Allowance | null;
+  allowanceLimit?: number;
+  accountActions?: ReactNode;
   approvalsCount: number;
-  /** True when the viewer can move between workspaces. Owners cannot. */
+  /** True when the authenticated account has more than one company or is agency staff. */
   canSwitch: boolean;
 };
 
@@ -43,8 +47,11 @@ export function Sidebar({
   allowance,
   approvalsCount,
   canSwitch,
+  allowanceLimit,
+  accountActions,
 }: SidebarProps) {
   const pathname = usePathname();
+  const preview = useOptionalStudioPreview();
   const base = `/w/${workspace.slug}`;
   const items = navItems(base);
 
@@ -64,19 +71,24 @@ export function Sidebar({
           <Wordmark />
         </Link>
         <p className="tnum text-[13px] text-meta lg:hidden">
-          {allowance.monthLabel} ads {allowance.used} / {allowance.total}
+          {allowance
+            ? `${allowance.monthLabel} ads ${allowance.used} / ${allowance.total}`
+            : `${allowanceLimit ?? ""} ads per month`}
         </p>
       </div>
 
       <div className="px-3">
         {canSwitch ? (
-          <button
-            type="button"
+          <Link
+            href="/workspaces"
             className="flex h-11 w-full items-center justify-between gap-2 rounded-[10px] px-2.5 text-left transition-colors duration-150 hover:bg-muted"
           >
             {workspaceName}
-            <ChevronDown className="size-4 shrink-0 text-meta" aria-hidden="true" />
-          </button>
+            <ChevronDown
+              className="size-4 shrink-0 text-meta"
+              aria-hidden="true"
+            />
+          </Link>
         ) : (
           <div className="flex h-11 items-center px-2.5">{workspaceName}</div>
         )}
@@ -85,8 +97,19 @@ export function Sidebar({
       <ul className="flex gap-0.5 overflow-x-auto px-3 pb-2 lg:mt-4 lg:flex-col lg:overflow-visible lg:pb-0">
         {items.map((item) => {
           const active =
-            item.href === base ? pathname === base : pathname.startsWith(item.href);
-          const count = item.badge === "approvals" ? approvalsCount : 0;
+            item.href === base
+              ? pathname === base
+              : pathname.startsWith(item.href) ||
+                (item.href === `${base}/create` &&
+                  pathname.startsWith(`${base}/jobs/`));
+          const count =
+            item.badge === "approvals"
+              ? Math.max(
+                  0,
+                  approvalsCount -
+                    Object.keys(preview?.state.decisions ?? {}).length,
+                )
+              : 0;
 
           return (
             <li key={item.href} className="shrink-0 lg:shrink">
@@ -113,7 +136,19 @@ export function Sidebar({
       </ul>
 
       <div className="mt-auto hidden px-3 pt-8 pb-3 lg:block">
-        <AllowanceCard allowance={allowance} orgName={workspace.orgName} />
+        {allowance ? (
+          <AllowanceCard allowance={allowance} orgName={workspace.orgName} />
+        ) : (
+          <div className="rounded-xl border border-line p-4 text-sm">
+            <p className="font-medium">Monthly plan</p>
+            <p className="mt-2 text-secondary-ink">
+              {allowanceLimit} ads per month
+            </p>
+            <p className="mt-2 text-xs text-meta">
+              Managed by {workspace.orgName}
+            </p>
+          </div>
+        )}
       </div>
 
       <div className="hidden items-center gap-2.5 border-t border-line px-5 py-4 lg:flex">
@@ -128,6 +163,9 @@ export function Sidebar({
           <span className="text-meta"> · {ROLE_WORD[viewer.role]}</span>
         </p>
       </div>
+      {accountActions && (
+        <div className="border-t border-line px-5 py-3">{accountActions}</div>
+      )}
     </nav>
   );
 }

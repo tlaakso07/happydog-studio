@@ -1,0 +1,48 @@
+// Integration check for an isolated or hosted beta. Never logs credentials or cookies.
+import assert from "node:assert/strict";
+const base = process.env.STUDIO_GATE_TEST_URL;
+const password = process.env.STUDIO_GATE_TEST_PASSWORD;
+if (!base || !password) throw new Error("Set STUDIO_GATE_TEST_URL and STUDIO_GATE_TEST_PASSWORD.");
+const origin = new URL(base).origin;
+const request = (path, options = {}) => fetch(new URL(path, origin), { redirect: "manual", ...options });
+const locked = await request("/w/northline-windows", { headers: { accept: "text/html" } });
+assert.equal(locked.status, 303);
+assert.equal(new URL(locked.headers.get("location"), origin).pathname, "/preview-access");
+const screen = await request("/preview-access");
+assert.equal(screen.status, 200);
+assert.equal(screen.headers.get("referrer-policy"), "same-origin", "native form posts must retain their Origin");
+const html = await screen.text();
+assert.ok(html.includes('type="password"'));
+assert.ok(!html.includes(password));
+const post = (value, extra = {}) => request("/preview-access", { method: "POST", headers: { origin, "content-type": "application/x-www-form-urlencoded", ...extra }, body: new URLSearchParams({ password: value, next: "/w/northline-windows" }) });
+const incorrect = await post("incorrect-password");
+assert.equal(incorrect.status, 401);
+assert.equal(incorrect.headers.get("referrer-policy"), "same-origin", "password retries must retain their Origin");
+assert.equal((await post(password, { origin: "https://unrelated.example" })).status, 403);
+assert.equal((await post(password, { origin: "null" })).status, 403);
+assert.equal((await post(password, { origin: "" })).status, 403);
+assert.equal((await post("x".repeat(5000))).status, 401);
+const unlocked = await post(password);
+assert.equal(unlocked.status, 303);
+const setCookie = unlocked.headers.get("set-cookie");
+assert.ok(setCookie?.includes("HttpOnly"));
+assert.match(setCookie, /SameSite=strict/i);
+if (origin.startsWith("https:")) assert.match(setCookie, /Secure/i);
+const cookie = setCookie.split(";")[0];
+for (const path of ["/w/northline-windows", "/w/northline-windows/brand", "/w/northline-windows/approvals"]) {
+  const response = await request(path, { headers: { cookie } });
+  assert.equal(response.status, 200, path);
+  const body = await response.text();
+  assert.ok(body.includes("Northline"), path);
+  assert.ok(!body.includes(password), "password must never be rendered");
+  assert.match(response.headers.get("cache-control"), origin.startsWith("https:") ? /no-store/ : /no-store|no-cache/);
+}
+const home = await request("/w/northline-windows", { headers: { cookie } });
+const homeHtml = await home.text();
+const asset = /src="([^" ]+\.js(?:\?[^" ]*)?)"/.exec(homeHtml)?.[1];
+assert.ok(asset);
+assert.equal((await request(asset, { headers: { cookie } })).status, 200);
+assert.equal((await request(asset)).status, 401, "static assets must not bypass the gate");
+assert.equal((await request("/w/northline-windows", { headers: { cookie: "studio-preview-access=forged" } })).status, 401);
+assert.equal((await request("/w/northline-windows", { method: "POST", headers: { "next-action": "unknown" } })).status, 401);
+console.log("PASS: password screen, invalid/oversized/cross-origin rejection, correct password, secure session, protected app pages/assets/actions, and forged-session rejection.");

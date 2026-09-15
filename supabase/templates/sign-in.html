@@ -1,0 +1,15 @@
+<!doctype html>
+<html lang="en">
+  <head><meta charset="utf-8"><title>Your sign-in link</title></head>
+  <body style="margin:0;padding:32px;background:#F6F7F9;font-family:Arial,sans-serif;color:#16181D">
+    <main style="max-width:440px;margin:0 auto;padding:32px;background:#FFFFFF;border:1px solid #E5E7EE;border-radius:12px">
+      <h1 style="margin:0 0 16px;font-size:26px">Your sign-in link</h1>
+      <p style="line-height:1.6;color:#4C5262">Open the link below, then select Continue to my studio to finish signing in.</p>
+      <p style="margin:28px 0">
+        <a href="{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&amp;type=email" style="display:inline-block;padding:14px 24px;border-radius:24px;background:#2447F5;color:#FFFFFF;text-decoration:none;font-weight:600">Sign in to my studio</a>
+      </p>
+      <p style="line-height:1.6;color:#4C5262">This link can be used once. If you requested more than one email, use the newest link.</p>
+      <p style="line-height:1.6;color:#4C5262">If you did not request this email, you can ignore it.</p>
+    </main>
+  </body>
+</html>
