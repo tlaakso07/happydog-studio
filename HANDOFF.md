@@ -2,6 +2,26 @@
 
 Live state ledger. Newest at the top. Read AGENTS.md first.
 
+## 2026-09-15 · Shareable Vercel sample beta deployed
+
+- Trevor explicitly requested deploying the current app to Vercel for Ryan. Created dedicated project `happydog-studio-beta` in `tlaakso11-3399s-projects`, project ID `prj_3TQVaQvCEsxDIicjFbi175aeYFKL`. No existing Vercel app was modified.
+- Shared URL: https://happydog-studio-beta.vercel.app, aliased to verified preview https://happydog-studio-beta-j5frwvq80-tlaakso11-3399s-projects.vercel.app. Deployment `dpl_95xhZ7j26Q8F1AtFXU3g16eeW3Rb` is READY. Build took 56 seconds; framework is Next.js 16.3.4.
+- Deployed tracked source from commit `bdb9233` through `/tmp/studio-vercel-beta`, excluding ignored local environments and dependencies. Project root is `apps/web`; the configured install uses the pinned pnpm and build uses Webpack. Added `docs/VERCEL-BETA.md` for repeatable deployment instructions.
+- Vercel defaults the first deployment of a new project to production even without --prod. That initial deployment remains fail-closed under the existing production Auth rule. Created a second deployment with explicit `--target preview` and pointed the short alias at it without promotion. Future sample deployments must explicitly target preview.
+- `STUDIO_MODE=preview` is the only project environment variable. No live Supabase, SMTP, or provider credentials were uploaded. Vercel Authentication is disabled for this sample-only project so Ryan can open the link. No GitHub auto-deployment connection was created, and production Auth/RLS rules are unchanged.
+- Validation: 15 existing web tests pass; hosted build and TypeScript checks pass. Anonymous HTTP checks passed for root, login redirect, Home, Brand room, New ad, Approvals, script, and scenes. Existing sample-state behavior and limitations remain: edits reset on reload, with no real rendering or customer persistence.
+
+## 2026-09-15 · Ryan's repository access confirmed
+
+- Trevor reported a 404 during Ryan's invitation/setup flow. GitHub's API returned no pending repository invitations and confirmed `justadude-jpg` has `write` permission on `tlaakso07/happydog-studio`.
+- Ryan already has repository access. No replacement invitation or permission change is needed. Continue local setup from `codex/continue-studio`; the precise cause of the reported 404 was not independently observed.
+
+## 2026-09-15 · Local beta reopened
+
+- Trevor requested opening the local app. Port 3100 was stopped and the prior temporary checkout no longer existed. Started the no-login beta directly from this authoritative workspace with `pnpm dev --hostname 127.0.0.1 --port 3100`.
+- Verified `/w/northline-windows` returns HTTP 200 and opened it in the app browser. No product code or hosted services changed.
+- Trevor reports making Ryan's guide public himself. This supersedes the earlier pending audience decision; access was not independently inspected in this session.
+
 ## 2026-09-10 · Interactive beginner handoff for Ryan
 
 - Trevor requested an interactive HTML link to email Ryan: product walkthrough, honest beta status, five days of useful work, complete safe local setup, and a final feedback questionnaire. Ryan confirmed Mac with Claude desktop. No partner email was sent.
