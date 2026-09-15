@@ -4,7 +4,7 @@ This deployment is a shareable copy of the existing no-login sample app. It does
 
 Share URL: https://happydog-studio-beta.vercel.app
 
-Verified preview: https://happydog-studio-beta-ihsw6s0nr-tlaakso11-3399s-projects.vercel.app
+Verified preview: https://happydog-studio-beta-oe04ek8kr-tlaakso11-3399s-projects.vercel.app
 
 The short URL is an alias to that preview deployment. It is not a promotion to the production environment.
 
@@ -31,6 +31,8 @@ Update `STUDIO_PREVIEW_PASSWORD` as a sensitive Preview variable and redeploy ex
 To lock a browser early, clear its cookies for the beta site. Ordinary local `pnpm dev` stays open unless `STUDIO_PREVIEW_PASSWORD` is set locally. Hosted Preview and Production environments require the password configuration; the underlying production customer-auth rule still applies independently.
 
 ## Verification
+
+Test the native browser form with an incorrect password followed by the correct password, then reload Home to verify the session. The form response must use `Referrer-Policy: same-origin`; `no-referrer` makes native form submissions send a null Origin and fail the security check. Requests from other websites or with null/missing origins must remain rejected. A raw HTTP test that explicitly supplies Origin cannot replace the browser test.
 
 `pnpm --filter @studio/web test` covers password comparison, fail-closed configuration, expiration, tampering, and rotation. `scripts/check-preview-gate.mjs` checks the password page, invalid/oversized/cross-origin requests, valid entry, protected pages/assets/actions, and forged cookies. Supply `STUDIO_GATE_TEST_URL` and `STUDIO_GATE_TEST_PASSWORD` privately through the process environment. Do not log them or place credentials in command arguments.
 

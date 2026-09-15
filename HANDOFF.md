@@ -2,6 +2,13 @@
 
 Live state ledger. Newest at the top. Read AGENTS.md first.
 
+## 2026-09-15 · Browser password submission fixed
+
+- Ryan reported `Request not allowed.` after submitting the shared beta password. The gate page inherited `Referrer-Policy: no-referrer`, which suppresses the Origin on native browser form posts and conflicts with the strict same-origin check. Earlier HTTP tests explicitly supplied Origin and missed this browser behavior.
+- Set `Referrer-Policy: same-origin` only on password form responses, including wrong-password retries. Other private responses retain no-referrer. Cross-site, null, and missing origins remain rejected; the password and session protections are unchanged.
+- Deployed preview `dpl_9a5tB995ZFySRpqupZdC4QfKnTa3` at https://happydog-studio-beta-oe04ek8kr-tlaakso11-3399s-projects.vercel.app and repointed https://happydog-studio-beta.vercel.app after verification. The existing shared password is unchanged.
+- Validation: 18 unit tests, lint, hosted build and TypeScript pass. Expanded HTTP regression checks pass on both the new preview and stable alias. Actual browser form testing verified wrong-password feedback, correct-password entry to Home, and access after refresh on the stable alias. The previous gated deployment remains password-protected; no passwordless deployment was created.
+
 ## 2026-09-15 · App password gate completed and deployed
 
 - Trevor chose an application password gate instead of Vercel's paid add-on. Finished the existing uncommitted Basic Auth draft as a password-only HTML form at `/preview-access`, using the shared PRODUCT name and app palette. No username or Vercel account is required.
