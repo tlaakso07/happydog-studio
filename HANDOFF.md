@@ -2,6 +2,21 @@
 
 Live state ledger. Newest at the top. Read AGENTS.md first.
 
+## 2026-09-15 · App password gate completed and deployed
+
+- Trevor chose an application password gate instead of Vercel's paid add-on. Finished the existing uncommitted Basic Auth draft as a password-only HTML form at `/preview-access`, using the shared PRODUCT name and app palette. No username or Vercel account is required.
+- The proxy gates all routes, assets, image requests, and server actions. Password verification is server-only and timing-safe. Bounded, schema-validated form input and same-origin checks precede a signed 24-hour session cookie with HttpOnly, Secure on hosted requests, SameSite=Strict, and no Domain attribute. Gate responses are private/no-store and noindex; session tampering, expiration, rotation, and absent configuration fail closed. Ordinary local beta access stays open. Live customer Auth/RLS is unchanged.
+- Stored the generated password as the sensitive Preview variable `STUDIO_PREVIEW_PASSWORD` on the existing dedicated Vercel project. It is not in source control or logs. Private local handoff file: `/tmp/studio-beta-password.txt`. No native password-protection add-on or recurring fee was enabled.
+- Live alias: https://happydog-studio-beta.vercel.app. New preview: https://happydog-studio-beta-ihsw6s0nr-tlaakso11-3399s-projects.vercel.app, deployment `dpl_8cKuJR2XZu47B2dHg1oMPBgFMSSd`, READY. Repointed the alias and removed all three superseded deployments before removing temporary Vercel account protection. No older passwordless copies remain in this project.
+- Validation: 18 unit tests, lint, hosted build, and hosted TypeScript pass. The integration script passes locally and against the live alias: correct/incorrect password, same-origin enforcement, oversized input, secure cookie, protected Home/Brand/Approvals, asset access before/after login, blocked unauthenticated actions, and forged-session rejection. See `scripts/check-preview-gate.mjs` and `docs/VERCEL-BETA.md`.
+
+## 2026-09-15 · Public beta access restricted; password option pending
+
+- Trevor requested a password so only he and Ryan can access the Vercel beta. Verified the team is Pro with no existing deployment-protection add-on. Vercel's current native password feature costs $20/month per project; enabling it starts the recurring charge.
+- Prepared an all-deployments native password patch in a mode-0600 temporary file outside the repository. The password is not logged or committed. The patch is not applied and no password-protection charge has started. Asked whether Trevor prefers a password gate in the app or the $20/month native Vercel feature; response is pending.
+- Immediately enabled included Vercel Authentication with `ssoProtection.deploymentType=all` on `happydog-studio-beta` to restrict public access during this decision. This temporarily requires an authorized Vercel account, not the requested shared password. Ryan's GitHub collaborator status does not automatically grant Vercel access. Do not report the password setup as complete.
+- When finishing: native protection should cover all deployment URLs, with anonymous and password-entry checks. An app-based alternative must also address older deployment URLs before removing the temporary Vercel protection. Do not leave old unguarded previews accessible.
+
 ## 2026-09-15 · Shareable Vercel sample beta deployed
 
 - Trevor explicitly requested deploying the current app to Vercel for Ryan. Created dedicated project `happydog-studio-beta` in `tlaakso11-3399s-projects`, project ID `prj_3TQVaQvCEsxDIicjFbi175aeYFKL`. No existing Vercel app was modified.

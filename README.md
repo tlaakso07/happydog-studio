@@ -6,7 +6,7 @@ An agency locks a company's brand into a per-company brand system. The owner sta
 
 ## Start here
 
-**Open the hosted sample beta:** https://happydog-studio-beta.vercel.app. No sign-in or local setup is needed to explore it. See [Vercel beta notes](docs/VERCEL-BETA.md) for deployment details and limitations.
+**Open the hosted sample beta:** https://happydog-studio-beta.vercel.app. Enter the shared beta password supplied privately by Trevor. No Vercel account is required. Local development still opens without sign-in. See [Vercel beta notes](docs/VERCEL-BETA.md) for deployment details and limitations.
 
 **New to the repo, human or agent: read [ONBOARDING.md](ONBOARDING.md).** It covers setup, the rules that get work rejected, and what is deliberately not built yet.
 
